@@ -16,7 +16,10 @@ export const userSchema = z.object({
   can_withdraw: z.boolean().default(true),
   turnover: numericValueSchema.default(0),
   created: z.string().default(""),
-  minimal_deposit: numericValueSchema.default(0)
+  minimal_deposit: numericValueSchema.default(0),
+  minimal_withdraw: numericValueSchema.optional(),
+  aml_verified: z.boolean().optional(),
+  is_banned: z.boolean().optional()
 }).passthrough();
 
 export const collectionSummarySchema = z.object({
@@ -94,13 +97,14 @@ export const ownedNftSchema = z.object({
 }).passthrough();
 
 export const notificationSchema = z.object({
-  key: identifierSchema,
+  key: identifierSchema.optional(),
   icon: z.coerce.number().int().default(0),
   title: z.string(),
   description: z.string(),
   created: z.string(),
-  balance_before: numericValueSchema.optional(),
-  balance_after: numericValueSchema.optional()
+  is_read: z.boolean().optional(),
+  balance_before: numericValueSchema.nullable().optional(),
+  balance_after: numericValueSchema.nullable().optional()
 }).passthrough();
 
 export const paymentMethodSchema = z.object({

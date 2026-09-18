@@ -5,7 +5,7 @@ import { ClientLayout } from "./client-layout";
 
 const { useAuthMock } = vi.hoisted(() => ({ useAuthMock: vi.fn() }));
 
-vi.mock("@/auth/auth-context", () => ({ useAuth: useAuthMock }));
+vi.mock("@/auth/auth-context", () => ({ useAuth: useAuthMock, useAuthenticatedUser: () => { const auth = useAuthMock() as { user: unknown }; return { user: auth.user, refreshUser: vi.fn() }; } }));
 
 function baseUser(overrides: Record<string, unknown> = {}) {
   return {

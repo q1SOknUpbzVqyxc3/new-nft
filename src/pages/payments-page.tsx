@@ -1,6 +1,7 @@
 import { ArrowDownToLine, ArrowUpFromLine, CheckCircle2, ExternalLink, RefreshCw } from "lucide-react";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useAuthenticatedUser } from "@/auth/auth-context";
+import { SupportLink } from "@/components/support-link";
 import { Button } from "@/components/ui/button";
 import { ErrorState, LoadingState } from "@/components/ui/page-state";
 import { TextField } from "@/components/ui/text-field";
@@ -146,7 +147,7 @@ export function PaymentsPage({ mode }: { mode: "topup" | "withdraw" }) {
           <label className="field"><span className="field__label">Способ</span><select className="select" name="method" required defaultValue="" disabled={pending} onChange={(event) => setSelectedMethodId(Number(event.target.value))}><option value="" disabled>Выберите способ</option>{methods.data.map((method) => <option key={method.api_id} value={method.api_id}>{method.label}{method.network ? ` · ${method.network}` : ""}</option>)}</select></label>
           <TextField label="Сумма" name="amount" type="number" min={minimumAmount || 0.01} step="0.01" hint={minimumAmount ? `Минимум ${formatMoney(minimumAmount, user.currency)}` : undefined} disabled={pending} required />
           {mode === "withdraw" ? <><TextField label="Реквизиты" name="details" disabled={pending} /><TextField label="Банк (если требуется)" name="bank" disabled={pending} /></> : null}
-          {withdrawBlocked ? <div className="inline-alert" role="alert">Вывод средств временно недоступен для вашего аккаунта.</div> : null}
+          {withdrawBlocked ? <div className="inline-alert" role="alert">Вывод средств временно недоступен для вашего аккаунта. <SupportLink /></div> : null}
           {error ? <div className="inline-alert" role="alert">{error}</div> : null}
           {withdrawCreated ? <div className="inline-alert inline-alert--success"><CheckCircle2 size={17} /> Запрос на вывод создан.</div> : null}
           {withdrawCreated && withdrawSyncWarning ? <div className="inline-alert inline-alert--warning">Не удалось обновить данные аккаунта. Обновите страницу.</div> : null}

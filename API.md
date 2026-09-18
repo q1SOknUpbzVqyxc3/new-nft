@@ -189,3 +189,11 @@ Swagger описывает request parameters, но response schemas опубл�
 - `GET /api/check_key`: endpoint и query contract подтверждены; response body не описан. Frontend считает любой успешный 2xx активацией и затем повторно проверяет `/api/user`.
 - Favourites response: response schema `{}`. Клиент принимает identifier либо объект с `nft_id`, `pic.id` или `id`; окончательная семантика требует authenticated contract verification.
 - Все response bodies формально `{}` в OpenAPI. Используемые runtime schemas восстановлены из production bundle и должны быть перенесены в backend OpenAPI при отдельном разрешении на backend-работы.
+
+
+## Verified against live backend (2026-09-19)
+- `/api/user` additionally returns `aml_verified`, `is_banned`, `can_bet`, `minimal_withdraw`, `unread_notifications_count`, `lang`, `favourite`.
+- `/api/user/notifications/fetch` items: `icon,title,description,created,is_read,balance_before?,balance_after?` (no `key`; before/after nullable).
+- `/api/get_collection_nft` returns `count` in addition to `nfts,name,author,min_price,max_price,in_own`.
+- `/api/get_nft` returns `created,status` in addition to documented fields.
+- Missing endpoints (sessions, 2FA, offers, auctions, analytics, creator, achievements): see `docs/NFT_PRODUCT_GAPS.md`.

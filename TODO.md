@@ -40,3 +40,11 @@
 | Оценить favourites product flow | Endpoints есть, но стабильный пользовательский сценарий в production не подтверждён. |
 | Добавить performance budgets в CI | Требует согласованного deployment/staging профиля. |
 | Добавить локализацию всего нового UI | Backend хранит язык, но новый UI сейчас русскоязычный. |
+
+
+## Product roadmap status (2026-09-19)
+**IMPLEMENTED**: account trust block (active/verified/AML boolean/withdraw/ban), notification redesign with real balance delta, env-driven support CTA.
+**BACKEND BLOCKED (High)**: offers/auctions, ownership history & activity, extended NFT metadata, collection analytics, portfolio analytics, rankings, multi-entity search, sessions/2FA.
+**BACKEND BLOCKED (Medium)**: paid author verification, creator publishing, achievements/levels, AML enum.
+**NOT TESTED**: light-theme/mobile pass of new trust block; support CTA (needs `VITE_SUPPORT_URL`).
+**PLANNED**: confirm `can_bet`, `count`, `follow` semantics; confirm NFT support channel.

@@ -2,6 +2,8 @@ import { BadgeCheck, Camera, KeyRound, Settings, UserRound } from "lucide-react"
 import { type ChangeEvent, type FormEvent, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuthenticatedUser } from "@/auth/auth-context";
+import { AccountStatus } from "@/components/account-status";
+import { SupportLink } from "@/components/support-link";
 import { Button } from "@/components/ui/button";
 import { SafeMedia } from "@/components/ui/safe-media";
 import { TextField } from "@/components/ui/text-field";
@@ -107,11 +109,8 @@ export function ProfilePage({ section = "general" }: { section?: Section }) {
         <aside className="profile-nav"><NavLink end to="/client/profile"><UserRound /> Основное</NavLink><NavLink to="/client/profile/security"><KeyRound /> Безопасность</NavLink><NavLink to="/client/profile/settings"><Settings /> Настройки</NavLink></aside>
         <section className="surface profile-panel">
           {section === "general" ? <>
-            <ul className="status-list" aria-label="Статус аккаунта">
-              <li className={user.active ? "status-item status-item--ok" : "status-item status-item--bad"}><span>Аккаунт</span><strong>{user.active ? "Активирован" : "Не активирован"}</strong></li>
-              <li className={user.verificated ? "status-item status-item--ok" : "status-item status-item--bad"}><span>Верификация</span><strong>{user.verificated ? "Пройдена" : "Не пройдена"}</strong></li>
-              <li className={user.can_withdraw ? "status-item status-item--ok" : "status-item status-item--bad"}><span>Вывод средств</span><strong>{user.can_withdraw ? "Доступен" : "Ограничен"}</strong></li>
-            </ul>
+            <AccountStatus user={user} />
+            {!user.can_withdraw || user.is_banned || !user.active ? <p className="profile-muted">Часть операций временно недоступна. <SupportLink /></p> : null}
             <div className="profile-identity"><div className="profile-avatar">{user.avatar ? <SafeMedia src={resolveApiMediaUrl(user.avatar)} alt="Аватар пользователя" /> : <UserRound />}<label className="profile-avatar__action"><Camera /><span className="sr-only">Загрузить новый аватар</span><input type="file" accept="image/jpeg,image/png,image/webp" disabled={pending} onChange={(event) => void uploadAvatar(event)} /></label></div><div><h2>{user.username || user.email.split("@")[0]}</h2>{user.verificated ? <span className="verified-label"><BadgeCheck /> Проверенный аккаунт</span> : <span className="profile-muted">ID {String(user.id)}</span>}</div></div>
             <div className="account-metrics"><div><span>Баланс</span><strong>{formatMoney(user.balance, user.currency)}</strong></div><div><span>Оборот</span><strong>{formatMoney(user.turnover, user.currency)}</strong></div></div>
             <form className="form-stack profile-form" onSubmit={(event) => void submitUsername(event)}><TextField label="Имя пользователя" name="username" defaultValue={user.username ?? ""} minLength={3} maxLength={20} disabled={pending} required /><Button type="submit" disabled={pending}>{pending ? "Сохраняем…" : "Изменить имя"}</Button></form>
