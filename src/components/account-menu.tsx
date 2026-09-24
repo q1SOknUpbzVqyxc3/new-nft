@@ -2,6 +2,7 @@ import { BadgeCheck, ShieldCheck, UserRound, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { User } from "@/lib/api/schemas";
 import { resolveAvatarUrl } from "@/lib/api/client";
+import { useAvatarVersion } from "@/lib/avatar";
 import { SafeMedia } from "./ui/safe-media";
 
 function Badge({ ok, label, children }: { ok: boolean | undefined; label: string; children: React.ReactNode }) {
@@ -12,9 +13,10 @@ function Badge({ ok, label, children }: { ok: boolean | undefined; label: string
 /** Account chip in the header: avatar, name and the three trust badges (verified / withdrawals / AML). */
 export function AccountChip({ user }: { user: User }) {
   const name = user.username ? `@${user.username}` : user.email;
+  const version = useAvatarVersion(user.id);
   return (
     <Link to="/client/profile" className="account-chip" title={user.email}>
-      <span className="account-chip__avatar">{user.avatar ? <SafeMedia src={resolveAvatarUrl(user.id, user.avatar)} alt="" credentials /> : <UserRound size={18} aria-hidden="true" />}</span>
+      <span className="account-chip__avatar">{user.avatar ? <SafeMedia src={resolveAvatarUrl(user.id, version || user.avatar)} alt="" credentials /> : <UserRound size={18} aria-hidden="true" />}</span>
       <span className="account-chip__name">{name}</span>
       <span className="account-chip__badges">
         <Badge ok={user.verificated} label={user.verificated ? "Аккаунт верифицирован" : "Аккаунт не верифицирован"}><BadgeCheck size={14} aria-hidden="true" /></Badge>

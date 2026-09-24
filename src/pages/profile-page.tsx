@@ -12,6 +12,7 @@ import { SafeMedia } from "@/components/ui/safe-media";
 import { TextField } from "@/components/ui/text-field";
 import { TwoFactorCard } from "@/components/two-factor-card";
 import { resolveAvatarUrl } from "@/lib/api/client";
+import { bumpAvatarVersion, useAvatarVersion } from "@/lib/avatar";
 import { getUserFacingError } from "@/lib/api/errors";
 import { api } from "@/lib/api/services";
 import { getFormString } from "@/lib/form-data";
@@ -25,18 +26,21 @@ type Feedback = { type: "success" | "error"; message: string };
 export function ProfilePage({ section = "general" }: { section?: Section }) {
   const { user, refreshUser } = useAuthenticatedUser();
   const language = useLanguage();
+  const avatarVersion = useAvatarVersion(user.id);
   const [pending, setPending] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   async function runUpdate(update: () => Promise<unknown>, successMessage = "Изменения сохранены.") {
-    if (pending) return;
+    if (pending) return false;
     setPending(true); setFeedback(null);
     try {
       await update();
       await refreshUser();
       setFeedback({ type: "success", message: successMessage });
+      return true;
     } catch (error) {
       setFeedback({ type: "error", message: getUserFacingError(error) });
+      return false;
     } finally {
       setPending(false);
     }
@@ -106,7 +110,8 @@ export function ProfilePage({ section = "general" }: { section?: Section }) {
       setFeedback({ type: "error", message: "Размер изображения не должен превышать 5 МБ." });
       return;
     }
-    await runUpdate(() => api.setAvatar(file), "Аватар обновлён.");
+    const success = await runUpdate(() => api.setAvatar(file), "Аватар обновлён.");
+    if (success) bumpAvatarVersion(user.id);
     event.target.value = "";
   }
 
@@ -119,7 +124,7 @@ export function ProfilePage({ section = "general" }: { section?: Section }) {
           {section === "general" ? <>
             <AccountStatus user={user} />
             {!user.can_withdraw || user.is_banned || !user.active ? <p className="profile-muted">Часть операций временно недоступна. <SupportLink /></p> : null}
-            <div className="profile-identity"><div className="profile-avatar">{user.avatar ? <SafeMedia src={resolveAvatarUrl(user.id, user.avatar)} alt="Аватар пользователя" credentials /> : <UserRound />}<label className="profile-avatar__action"><Camera /><span className="sr-only">Загрузить новый аватар</span><input type="file" accept="image/jpeg,image/png,image/webp" disabled={pending} onChange={(event) => void uploadAvatar(event)} /></label></div><div><h2>{user.username || user.email.split("@")[0]}</h2>{user.verificated ? <span className="verified-label"><BadgeCheck /> Проверенный аккаунт</span> : <span className="profile-muted">ID {String(user.id)}</span>}</div></div>
+            <div className="profile-identity"><div className="profile-avatar">{user.avatar ? <SafeMedia src={resolveAvatarUrl(user.id, avatarVersion || user.avatar)} alt="Аватар пользователя" credentials /> : <UserRound />}<label className="profile-avatar__action"><Camera /><span className="sr-only">Загрузить новый аватар</span><input type="file" accept="image/jpeg,image/png,image/webp" disabled={pending} onChange={(event) => void uploadAvatar(event)} /></label></div><div><h2>{user.username || user.email.split("@")[0]}</h2>{user.verificated ? <span className="verified-label"><BadgeCheck /> Проверенный аккаунт</span> : <span className="profile-muted">ID {String(user.id)}</span>}</div></div>
             <div className="account-metrics"><div><span>Баланс</span><strong>{formatMoney(user.balance, user.currency)}</strong></div><div><span>Оборот</span><strong>{formatMoney(user.turnover, user.currency)}</strong></div></div>
             <LevelCard user={user} />
             <form className="form-stack profile-form" onSubmit={(event) => void submitUsername(event)}><TextField label="Имя пользователя" name="username" defaultValue={user.username ?? ""} minLength={3} maxLength={20} disabled={pending} required /><Button type="submit" disabled={pending}>{pending ? "Сохраняем…" : "Изменить имя"}</Button></form>

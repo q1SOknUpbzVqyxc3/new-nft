@@ -1,7 +1,11 @@
 /*
  * TEMPORARY design variants (see lib/design.ts). Each block re-skins the site by overriding the design
  * tokens from globals.css and then adjusting the few components whose look is part of the design.
- * Remove this file, DesignSwitcher and DesignArt when a design has been chosen.
+ * Remove this file and DesignArt when a design has been chosen.
+ *
+ * Each block is dark-only (:not([data-theme="light"])): a bare `:root[data-design="x"]` selector would
+ * outrank `[data-theme="light"]` on specificity and force these hardcoded dark colours over the light
+ * palette even when light mode is selected. Light mode on any design falls back to the base light tokens.
  */
 
 /* ---------- Landing artwork ---------- */
@@ -38,7 +42,7 @@
 /* =====================================================================
    RESEND — black velvet with violet neon
    ===================================================================== */
-:root[data-design="resend"] {
+:root[data-design="resend"]:not([data-theme="light"]) {
   color-scheme: dark;
   --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -107,7 +111,7 @@
 /* =====================================================================
    DALA — constellation floating on black velvet
    ===================================================================== */
-:root[data-design="dala"] {
+:root[data-design="dala"]:not([data-theme="light"]) {
   color-scheme: dark;
   --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
   --color-bg: #000; --color-bg-elevated: #000;
@@ -170,7 +174,7 @@
 /* =====================================================================
    FACTORY — terminal war room at midnight
    ===================================================================== */
-:root[data-design="factory"] {
+:root[data-design="factory"]:not([data-theme="light"]) {
   color-scheme: dark;
   --font-sans: "Geist Variable", Geist, ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
