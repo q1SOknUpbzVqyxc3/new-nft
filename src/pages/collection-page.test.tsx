@@ -53,8 +53,30 @@ describe("CollectionPage", () => {
     renderCollectionPage();
     await screen.findByRole("heading", { name: "Neon Foxes" });
     fireEvent.change(screen.getByPlaceholderText("Поиск по token ID"), { target: { value: "999" } });
-    await screen.findByText("Измените поисковый запрос.");
+    await screen.findByText("Измените параметры поиска или сбросьте фильтры.");
     expect(screen.queryByRole("link", { name: /#1/ })).not.toBeInTheDocument();
+  });
+
+  it("filters the grid by price range and can be reset", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ name: "Neon Foxes", author: "Studio A", in_own: 0, min_price: 0, max_price: 0, nfts: [makeNft(1), makeNft(2), makeNft(3)] })));
+    renderCollectionPage();
+    await screen.findByRole("heading", { name: "Neon Foxes" });
+    fireEvent.change(screen.getByLabelText("Цена от"), { target: { value: "15" } });
+    await waitFor(() => expect(screen.queryByRole("link", { name: /#1/ })).not.toBeInTheDocument());
+    expect(screen.getByRole("link", { name: /#2/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /#3/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Сбросить фильтры" }));
+    await waitFor(() => expect(screen.getByRole("link", { name: /#1/ })).toBeInTheDocument());
+  });
+
+  it("sorts the grid by price", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ name: "Neon Foxes", author: "Studio A", in_own: 0, min_price: 0, max_price: 0, nfts: [makeNft(1), makeNft(2), makeNft(3)] })));
+    renderCollectionPage();
+    await screen.findByRole("heading", { name: "Neon Foxes" });
+    fireEvent.change(screen.getByLabelText("Сортировка"), { target: { value: "price-desc" } });
+    const names = await screen.findAllByRole("link");
+    const order = names.map((link) => link.getAttribute("aria-label"));
+    expect(order.indexOf("Neon Foxes #3")).toBeLessThan(order.indexOf("Neon Foxes #1"));
   });
 
   it("does not show fabricated stats when min/max price and in_own are zero", async () => {
