@@ -16,7 +16,7 @@ export function AccountChip({ user }: { user: User }) {
   const version = useAvatarVersion(user.id);
   return (
     <Link to="/client/profile" className="account-chip" title={user.email}>
-      <span className="account-chip__avatar">{user.avatar ? <SafeMedia src={resolveAvatarUrl(user.id, version || user.avatar)} alt="" credentials /> : <UserRound size={18} aria-hidden="true" />}</span>
+      <span className="account-chip__avatar">{user.avatar ? <SafeMedia src={resolveAvatarUrl(user.id, version || user.avatar)} alt="" credentials fallback={<UserRound size={18} aria-hidden="true" />} /> : <UserRound size={18} aria-hidden="true" />}</span>
       <span className="account-chip__name">{name}</span>
       <span className="account-chip__badges">
         <Badge ok={user.verificated} label={user.verificated ? "Аккаунт верифицирован" : "Аккаунт не верифицирован"}><BadgeCheck size={14} aria-hidden="true" /></Badge>

@@ -943,9 +943,16 @@ img {
   padding-block: var(--space-16);
 }
 
+.landing__copy {
+  /* Grid items default to min-width: auto, so the heading's unwrapped intrinsic width would otherwise
+     push this column wider than its track and overflow the viewport on narrow screens. */
+  min-width: 0;
+}
+
 .landing__copy h1 {
   max-width: 13ch;
   margin: 0;
+  overflow-wrap: break-word;
   font-size: clamp(3rem, 7vw, 6.5rem);
   line-height: 0.94;
   letter-spacing: -0.065em;
@@ -1132,6 +1139,9 @@ img {
 
 @media (max-width: 1023px) {
   .landing__hero,.asset-layout { grid-template-columns: 1fr; }
+  /* Collapsing to a single 1fr track still leaves children at their default min-width: auto, so
+     unwrapped long text (headings, addresses) can force the column wider than the viewport. */
+  .landing__hero > *,.asset-layout > * { min-width: 0; }
   .landing__visual { display: none; }
   .landing__copy h1 { max-width: 12ch; }
   .collection-stats { grid-template-columns: repeat(2,1fr); gap: var(--space-4); }
@@ -1162,6 +1172,7 @@ img {
   .asset-layout { gap: var(--space-6); }
   .sale-form { grid-template-columns: 1fr; }
   .finance-layout,.profile-layout { grid-template-columns: 1fr; }
+  .finance-layout > *,.profile-layout > * { min-width: 0; }
   .profile-nav { display: flex; overflow-x: auto; }
   .profile-nav a { flex: 0 0 auto; }
   .data-table__head { display: none; }
