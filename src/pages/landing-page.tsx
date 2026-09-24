@@ -1,6 +1,7 @@
 import { ArrowRight, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Brand } from "@/components/brand";
+import { DesignArt } from "@/components/design-art";
 
 export function LandingPage() {
   return (
@@ -23,9 +24,7 @@ export function LandingPage() {
           </div>
         </div>
         <div className="landing__visual" aria-hidden="true">
-          <div className="landing__orb landing__orb--one" />
-          <div className="landing__orb landing__orb--two" />
-          <div className="landing__preview"><span>MARKET PULSE</span><strong>Curated collections</strong><div className="landing__bars"><i /><i /><i /><i /><i /><i /><i /></div></div>
+          <DesignArt />
         </div>
       </section>
       <section className="landing__principles container" aria-label="Преимущества">

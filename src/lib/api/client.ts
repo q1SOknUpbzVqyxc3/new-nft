@@ -1,6 +1,8 @@
 import type { ZodType } from "zod";
 
 const DEFAULT_TIMEOUT_MS = 15_000;
+const MAX_RATE_LIMIT_RETRIES = 2;
+const MAX_RETRY_DELAY_MS = 5_000;
 export const AUTH_INVALID_EVENT = "monvravex:auth-invalid";
 
 type RequestOptions = Omit<RequestInit, "credentials"> & {
@@ -68,6 +70,19 @@ function getErrorCode(payload: unknown, status: number) {
   return `http_${status}`;
 }
 
+function getRetryDelayMs(response: Response, attempt: number) {
+  const retryAfter = Number(response.headers.get("retry-after"));
+  const delay = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 800 * 2 ** attempt;
+  return Math.min(delay, MAX_RETRY_DELAY_MS);
+}
+
+function sleep(ms: number, signal?: AbortSignal | null) {
+  return new Promise<void>((resolve, reject) => {
+    const timeoutId = globalThis.setTimeout(resolve, ms);
+    signal?.addEventListener("abort", () => { globalThis.clearTimeout(timeoutId); reject(signal.reason instanceof Error ? signal.reason : new DOMException("Aborted", "AbortError")); }, { once: true });
+  });
+}
+
 export async function apiRequest<T>(
   path: string,
   schema: ZodType<T>,
@@ -82,15 +97,22 @@ export async function apiRequest<T>(
   options.signal?.addEventListener("abort", abortFromCaller, { once: true });
 
   try {
-    const response = await fetch(`${getApiBaseUrl()}${path}`, {
-      ...options,
-      signal: requestController.signal,
-      credentials: "include",
-      headers: {
-        Accept: "application/json",
-        ...options.headers
-      }
-    });
+    // Only idempotent reads are retried on 429; mutations (payments, withdrawals) are never repeated automatically.
+    const isRead = (options.method ?? "GET").toUpperCase() === "GET";
+    let response: Response;
+    for (let attempt = 0; ; attempt += 1) {
+      response = await fetch(`${getApiBaseUrl()}${path}`, {
+        ...options,
+        signal: requestController.signal,
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          ...options.headers
+        }
+      });
+      if (!isRead || response.status !== 429 || attempt >= MAX_RATE_LIMIT_RETRIES) break;
+      await sleep(getRetryDelayMs(response, attempt), requestController.signal);
+    }
     const payload = await parseResponseBody(response);
 
     if (!response.ok) {
@@ -131,4 +153,9 @@ export function createFormBody(values: Record<string, string | number | boolean 
   }
 
   return body;
+}
+
+/** True when the backend does not implement an endpoint yet (missing route / method / not implemented). */
+export function isEndpointUnavailable(error: unknown) {
+  return error instanceof ApiError && (error.status === 404 || error.status === 405 || error.status === 501);
 }

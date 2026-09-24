@@ -3,7 +3,13 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./auth/auth-context";
 import { App } from "./app";
+import "./app/fonts";
 import "./app/globals.css";
+import "./app/themes.css";
+import { DesignSwitcher } from "./components/design-switcher";
+import { applyDesign, readDesign } from "./lib/design";
+
+applyDesign(readDesign());
 
 const root = document.getElementById("root");
 
@@ -13,6 +19,7 @@ if (!root) {
 
 createRoot(root).render(
   <StrictMode>
+    <DesignSwitcher />
     <BrowserRouter>
       <AuthProvider>
         <App />

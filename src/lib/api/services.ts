@@ -1,7 +1,18 @@
 import { z, type ZodType } from "zod";
 import { apiRequest, createFormBody } from "./client";
 import {
+  activityFeedSchema,
+  auctionSchema,
+  auctionsSchema,
+  collectionStatsSchema,
+  nftExtraSchema,
+  portfolioHistorySchema,
+  portfolioSchema,
+  rankingSchema,
   collectionSchema,
+  deviceSessionsSchema,
+  popupNotificationsSchema,
+  twoFactorSetupSchema,
   collectionsSchema,
   financeHistoryListSchema,
   favouritesSchema,
@@ -38,6 +49,9 @@ function postForm<T = unknown>(
 export const api = {
   login(email: string, password: string, remember: boolean, signal?: AbortSignal) {
     return postForm("/api/login", { email, password, remember: Number(remember) }, mutationResponseSchema, signal);
+  },
+  loginWithTwoFactor(preAuthToken: string, code: string, remember: boolean, signal?: AbortSignal) {
+    return postForm("/api/login/2fa", { pre_auth_token: preAuthToken, code, remember: Number(remember) }, mutationResponseSchema, signal);
   },
   logout(signal?: AbortSignal) {
     return postForm("/api/logout", {}, mutationResponseSchema, signal);
@@ -133,6 +147,67 @@ export const api = {
   },
   changePassword(password: string, oldPassword: string, signal?: AbortSignal) {
     return postForm("/api/user/change_password", { password, old_password: oldPassword }, mutationResponseSchema, signal);
+  },
+  getSessions(signal?: AbortSignal) {
+    return postForm("/api/sessions", {}, deviceSessionsSchema, signal);
+  },
+  revokeSession(sessionId: string, signal?: AbortSignal) {
+    return postForm("/api/sessions/revoke", { session_id: sessionId }, mutationResponseSchema, signal);
+  },
+  revokeOtherSessions(signal?: AbortSignal) {
+    return postForm("/api/sessions/revoke-others", {}, mutationResponseSchema, signal);
+  },
+  setupTwoFactor(signal?: AbortSignal) {
+    return postForm("/api/2fa/setup", {}, twoFactorSetupSchema, signal);
+  },
+  enableTwoFactor(code: string, signal?: AbortSignal) {
+    return postForm("/api/2fa/enable", { code }, mutationResponseSchema, signal);
+  },
+  disableTwoFactor(signal?: AbortSignal) {
+    return postForm("/api/2fa/disable", {}, mutationResponseSchema, signal);
+  },
+  getActivityFeed(count: number, signal?: AbortSignal, scope?: { collectionId?: string; nftId?: string; lang?: string; theme?: string; currency?: string }) {
+    const query = new URLSearchParams({ count: String(count) });
+    if (scope?.lang) query.set("lang", scope.lang);
+    if (scope?.theme) query.set("theme", scope.theme);
+    if (scope?.currency) query.set("currency", scope.currency);
+    if (scope?.collectionId) query.set("collection_id", scope.collectionId);
+    if (scope?.nftId) query.set("image_id", scope.nftId);
+    return get(`/api/activity-feed?${query.toString()}`, activityFeedSchema, signal);
+  },
+  // ---- Marketplace extensions: proposed contract, documented in API.md ----
+  getCollectionStats(collectionId: string, signal?: AbortSignal) {
+    return get(`/api/collection/stats?collection_id=${encodeURIComponent(collectionId)}`, collectionStatsSchema, signal);
+  },
+  getNftExtra(imageId: string, signal?: AbortSignal) {
+    return get(`/api/nft/details?image_id=${encodeURIComponent(imageId)}`, nftExtraSchema, signal);
+  },
+  getAuction(imageId: string, signal?: AbortSignal) {
+    return get(`/api/nft/auction?image_id=${encodeURIComponent(imageId)}`, auctionSchema, signal);
+  },
+  getAuctions(status: "active" | "upcoming" | "ended", options: { collectionId?: string; limit?: number } = {}, signal?: AbortSignal) {
+    const query = new URLSearchParams({ status });
+    if (options.collectionId) query.set("collection_id", options.collectionId);
+    if (options.limit) query.set("limit", String(options.limit));
+    return get(`/api/auctions?${query.toString()}`, auctionsSchema, signal);
+  },
+  placeBid(imageId: string, amount: number, signal?: AbortSignal) {
+    return postForm("/api/nft/auction/bid", { image_id: imageId, amount }, mutationResponseSchema, signal);
+  },
+  buyNowAuction(imageId: string, signal?: AbortSignal) {
+    return postForm("/api/nft/auction/buy_now", { image_id: imageId }, mutationResponseSchema, signal);
+  },
+  getPortfolio(signal?: AbortSignal) {
+    return get("/api/portfolio", portfolioSchema, signal);
+  },
+  getPortfolioHistory(period: string, signal?: AbortSignal) {
+    return get(`/api/portfolio/history?period=${encodeURIComponent(period)}`, portfolioHistorySchema, signal);
+  },
+  getRankings(period: string, category: string, signal?: AbortSignal) {
+    return get(`/api/rankings?period=${encodeURIComponent(period)}&category=${encodeURIComponent(category)}`, rankingSchema, signal);
+  },
+  getPopupNotifications(signal?: AbortSignal) {
+    return get("/api/user/popup_notifications/fetch", popupNotificationsSchema, signal);
   },
   setAvatar(file: File, signal?: AbortSignal) {
     const body = new FormData();

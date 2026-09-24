@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { ActivityFeed } from "@/components/activity-feed";
 import { CollectionCard } from "@/components/collection-card";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/page-state";
 import { SafeMedia } from "@/components/ui/safe-media";
@@ -52,6 +53,7 @@ export function HomePage() {
           </aside>
         </div>
       )}
+      <ActivityFeed />
     </main>
   );
 }

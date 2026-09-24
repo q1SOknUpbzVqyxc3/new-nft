@@ -18,6 +18,11 @@ export const userSchema = z.object({
   created: z.string().default(""),
   minimal_deposit: numericValueSchema.default(0),
   minimal_withdraw: numericValueSchema.optional(),
+  level: numericValueSchema.optional(),
+  lang: z.string().optional(),
+  has_2fa: z.boolean().optional(),
+  unread_popup_notifications_count: numericValueSchema.optional(),
+  unread_notifications_count: numericValueSchema.optional(),
   aml_verified: z.boolean().optional(),
   is_banned: z.boolean().optional()
 }).passthrough();
@@ -84,8 +89,12 @@ export const ownedNftSchema = z.object({
   id: identifierSchema,
   status: z.union([z.boolean(), z.number()]).transform(Boolean),
   sale_price: numericValueSchema.default(0),
+  buy_price: numericValueSchema.optional(),
+  buy_date: nullableStringSchema,
+  sale_date: nullableStringSchema,
   pic: z.object({
     id: identifierSchema,
+    collection_id: identifierSchema.optional(),
     image: z.string(),
     number: identifierSchema,
     price: numericValueSchema.default(0),
@@ -149,7 +158,8 @@ export const nftHistorySchema = z.object({
   collection_name: z.string(),
   pic_id: identifierSchema,
   sale_price: numericValueSchema.default(0),
-  sale_date: nullableStringSchema
+  sale_date: nullableStringSchema,
+  buy_date: nullableStringSchema
 }).passthrough();
 
 export const favouriteSchema = z.union([
@@ -160,6 +170,139 @@ export const favouriteSchema = z.union([
     pic: z.object({ id: identifierSchema.optional() }).passthrough().optional()
   }).passthrough()
 ]);
+
+/** Device session. Field names are tolerant: the backend endpoint is not published yet. */
+export const deviceSessionSchema = z.object({
+  id: identifierSchema.optional(),
+  session_id: identifierSchema.optional(),
+  device: z.string().nullish(),
+  user_agent: z.string().nullish(),
+  ip: z.string().nullish(),
+  created: z.string().nullish(),
+  last_active: z.string().nullish(),
+  current: z.boolean().optional()
+}).passthrough();
+
+export const deviceSessionsSchema = z.union([
+  z.array(deviceSessionSchema),
+  z.object({ sessions: z.array(deviceSessionSchema) }).passthrough().transform((value) => value.sessions)
+]);
+
+export const twoFactorSetupSchema = z.object({
+  secret: z.string().default(""),
+  url: z.string().default("")
+}).passthrough();
+
+export const activityEventSchema = z.object({
+  id: identifierSchema.optional(),
+  text: z.string(),
+  ts: z.coerce.number().optional(),
+  color: z.string().nullish()
+}).passthrough();
+
+export const activityFeedSchema = z.union([
+  z.array(activityEventSchema),
+  z.object({ events: z.array(activityEventSchema) }).passthrough().transform((value) => value.events)
+]);
+
+export const popupNotificationSchema = z.object({
+  id: identifierSchema.optional(),
+  title: z.string().default(""),
+  description: z.string().default(""),
+  text: z.string().optional(),
+  type: z.string().optional(),
+  code: z.string().optional()
+}).passthrough();
+
+export const popupNotificationsSchema = z.union([
+  z.array(popupNotificationSchema),
+  z.object({ items: z.array(popupNotificationSchema) }).passthrough().transform((value) => value.items)
+]);
+
+/* ---- Marketplace extensions (not in the published OpenAPI yet): every field is optional so partial backends keep working. ---- */
+const optionalNumberSchema = numericValueSchema.optional();
+const seriesPointSchema = z.object({ time: z.union([z.string(), z.number()]), value: numericValueSchema }).passthrough();
+
+export const collectionStatsSchema = z.object({
+  floor_price: optionalNumberSchema,
+  total_volume: optionalNumberSchema,
+  owners: optionalNumberSchema,
+  listed: optionalNumberSchema,
+  listed_percent: optionalNumberSchema,
+  supply: optionalNumberSchema,
+  description: z.string().nullish(),
+  currency: z.string().optional(),
+  floor_history: z.array(seriesPointSchema).optional()
+}).passthrough();
+
+const traitSchema = z.object({
+  trait_type: z.string().optional(),
+  name: z.string().optional(),
+  value: z.union([z.string(), z.number()]),
+  rarity_percent: optionalNumberSchema
+}).passthrough();
+
+export const nftExtraSchema = z.object({
+  traits: z.array(traitSchema).optional(),
+  rarity_rank: optionalNumberSchema,
+  rarity_score: optionalNumberSchema,
+  supply: optionalNumberSchema,
+  contract_address: z.string().nullish(),
+  token_standard: z.string().nullish()
+}).passthrough();
+
+/** Platform-run auction lot. Only the platform creates lots; users bid or buy out. */
+export const auctionSchema = z.object({
+  id: identifierSchema.optional(),
+  image_id: identifierSchema.optional(),
+  collection_id: identifierSchema.optional(),
+  collection_name: z.string().optional(),
+  number: identifierSchema.optional(),
+  image: z.string().optional(),
+  blockchain: z.string().optional(),
+  status: z.enum(["active", "upcoming", "ended"]).optional(),
+  starts: z.string().nullish(),
+  ends: z.string(),
+  start_price: optionalNumberSchema,
+  current_bid: optionalNumberSchema,
+  min_bid: optionalNumberSchema,
+  buy_now_price: optionalNumberSchema,
+  bids: optionalNumberSchema,
+  currency: z.string().optional(),
+  is_leading: z.boolean().optional(),
+  my_bid: numericValueSchema.nullish()
+}).passthrough();
+
+const bestWorstSchema = z.object({ name: z.string(), image: z.string().optional(), pnl: numericValueSchema, id: identifierSchema.optional() }).passthrough();
+
+export const portfolioSchema = z.object({
+  value: optionalNumberSchema,
+  count: optionalNumberSchema,
+  unrealized_pnl: optionalNumberSchema,
+  realized_pnl: optionalNumberSchema,
+  total_spent: optionalNumberSchema,
+  total_received: optionalNumberSchema,
+  best: bestWorstSchema.nullish(),
+  worst: bestWorstSchema.nullish()
+}).passthrough();
+
+export const rankingRowSchema = z.object({
+  collection_id: identifierSchema,
+  name: z.string(),
+  image: z.string().default(""),
+  blockchain: z.string().default(""),
+  floor_price: optionalNumberSchema,
+  volume: optionalNumberSchema,
+  change_percent: optionalNumberSchema,
+  owners: optionalNumberSchema,
+  items: optionalNumberSchema,
+  currency: z.string().optional()
+}).passthrough();
+
+const listOrWrapped = <T extends z.ZodType>(item: T, key: string) => z.union([z.array(item), z.object({ [key]: z.array(item) }).passthrough().transform((value) => value[key] as z.infer<T>[])]);
+export const auctionsSchema = listOrWrapped(auctionSchema, "auctions");
+export const portfolioHistorySchema = listOrWrapped(seriesPointSchema, "points");
+export const rankingSchema = listOrWrapped(rankingRowSchema, "rows");
 
 export const collectionsSchema = z.array(collectionSummarySchema);
 export const searchResultsSchema = z.array(searchResultSchema);
@@ -182,4 +325,14 @@ export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
 export type PaymentSession = z.infer<typeof paymentSessionSchema>;
 export type FinanceHistory = z.infer<typeof financeHistorySchema>;
 export type NftHistory = z.infer<typeof nftHistorySchema>;
+export type CollectionStats = z.infer<typeof collectionStatsSchema>;
+export type NftExtra = z.infer<typeof nftExtraSchema>;
+export type Auction = z.infer<typeof auctionSchema>;
+export type Portfolio = z.infer<typeof portfolioSchema>;
+export type RankingRow = z.infer<typeof rankingRowSchema>;
+export type SeriesPoint = z.infer<typeof seriesPointSchema>;
+export type DeviceSession = z.infer<typeof deviceSessionSchema>;
+export type TwoFactorSetup = z.infer<typeof twoFactorSetupSchema>;
+export type ActivityEvent = z.infer<typeof activityEventSchema>;
+export type PopupNotification = z.infer<typeof popupNotificationSchema>;
 export type Favourite = z.infer<typeof favouriteSchema>;

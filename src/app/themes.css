@@ -1,0 +1,282 @@
+/*
+ * TEMPORARY design variants (see lib/design.ts). Each block re-skins the site by overriding the design
+ * tokens from globals.css and then adjusting the few components whose look is part of the design.
+ * Remove this file, DesignSwitcher and DesignArt when a design has been chosen.
+ */
+
+/* ---------- Switcher bar ---------- */
+html[data-design-switcher] { --switcher-h: 2.25rem; }
+html[data-design-switcher] .app-shell,
+html[data-design-switcher] .auth-layout,
+html[data-design-switcher] .centered-page { min-height: calc(100vh - var(--switcher-h)); }
+.design-switcher { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 0.875rem; height: var(--switcher-h, 2.25rem); padding-inline: 0.75rem; overflow-x: auto; border-bottom: 1px solid #33333b; background: #16161b; color: #e8e8ee; font: 500 12px/1 ui-sans-serif, system-ui, sans-serif; scrollbar-width: none; }
+.design-switcher__label { flex: none; color: #8c8c99; letter-spacing: 0.04em; text-transform: uppercase; }
+.design-switcher__options { display: flex; gap: 0.25rem; }
+.design-switcher__btn { flex: none; height: 1.5rem; padding: 0 0.75rem; border: 1px solid transparent; border-radius: 999px; background: transparent; color: #b4b4c0; font: inherit; cursor: pointer; }
+.design-switcher__btn:hover { background: #24242c; color: #fff; }
+.design-switcher__btn--active { border-color: #4a4a57; background: #2c2c36; color: #fff; }
+
+/* ---------- Landing artwork ---------- */
+.art-cube { position: absolute; inset: 0; display: grid; place-items: center; perspective: 900px; }
+.art-cube__body { position: relative; width: 16rem; height: 16rem; transform-style: preserve-3d; animation: art-cube-spin 26s linear infinite; }
+.art-cube__face { position: absolute; inset: 0; border: 1px solid #5b6168; background: linear-gradient(145deg, #15181d, #000 70%); box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.05), 0 0 24px rgba(146, 129, 247, 0.08); }
+.art-cube__face--front { transform: translateZ(8rem); }
+.art-cube__face--back { transform: rotateY(180deg) translateZ(8rem); }
+.art-cube__face--right { transform: rotateY(90deg) translateZ(8rem); }
+.art-cube__face--left { transform: rotateY(-90deg) translateZ(8rem); }
+.art-cube__face--top { transform: rotateX(90deg) translateZ(8rem); }
+.art-cube__face--bottom { transform: rotateX(-90deg) translateZ(8rem); }
+@keyframes art-cube-spin { from { transform: rotateX(-24deg) rotateY(0deg); } to { transform: rotateX(-24deg) rotateY(360deg); } }
+
+.art-constellation { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.art-dashboard { position: absolute; inset: 4rem 0 auto 0; overflow: hidden; border: 1px solid #2a2725; border-radius: 10px; background: #0d0d0d; }
+.art-dashboard__bar { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid #1d1a18; font: 400 12px/1 var(--font-mono, ui-monospace, monospace); letter-spacing: -0.02em; color: #b8b3b0; }
+.art-dashboard__dots { display: flex; gap: 6px; }
+.art-dashboard__dots i { width: 9px; height: 9px; border-radius: 50%; background: #3d3a39; }
+.art-dashboard__title { margin-inline: auto; }
+.art-dashboard__status { width: 6px; height: 6px; border-radius: 50%; background: #ee6018; }
+.art-dashboard__grid { display: grid; grid-template-columns: 1fr 1fr; }
+.art-dashboard__tile { display: grid; gap: 0.5rem; padding: 1.25rem; border-right: 1px solid #1d1a18; border-bottom: 1px solid #1d1a18; }
+.art-dashboard__tile:nth-child(2n) { border-right: 0; }
+.art-dashboard__tile:nth-child(n + 3) { border-bottom: 0; }
+.art-dashboard__tile span { color: #b8b3b0; font: 400 12px/1 var(--font-mono, ui-monospace, monospace); letter-spacing: -0.02em; text-transform: uppercase; }
+.art-dashboard__tile strong { color: #eee; font-size: 2.25rem; font-weight: 400; letter-spacing: -0.03em; line-height: 1.1; }
+.art-dashboard__tile svg { width: 100%; height: 2.5rem; }
+.art-dashboard__spark { fill: none; stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+.art-dashboard__spark--orange { stroke: #ee6018; }
+.art-dashboard__spark--green { stroke: #a0ca92; }
+
+/* =====================================================================
+   RESEND — black velvet with violet neon
+   ===================================================================== */
+:root[data-design="resend"] {
+  color-scheme: dark;
+  --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: "Playfair Display", Georgia, serif;
+  --color-bg: #000; --color-bg-elevated: #000;
+  --color-surface-1: #000; --color-surface-2: #0b0e14; --color-surface-3: #14181f;
+  --color-border: #292d30; --color-border-soft: #292d30;
+  --color-text: #f0f0f0; --color-text-secondary: #a1a4a5; --color-text-muted: #6e727a;
+  --color-accent: #9281f7; --color-accent-hover: #baa7ff; --color-accent-soft: rgba(146, 129, 247, 0.12);
+  --color-positive: #3ad389; --color-negative: #ff6465; --color-warning: #ffca16; --color-info: #70b8ff;
+  --radius-sm: 6px; --radius-md: 6px; --radius-lg: 16px; --radius-xl: 16px;
+  --shadow-floating: none;
+
+  & body { background: #000; font-feature-settings: "ss01", "ss03"; }
+  & .page-header h1, & .section-heading h2, & .auth-card h1 { font-weight: 400; letter-spacing: -0.045em; }
+  & .landing__copy h1 { max-width: 13ch; font-family: var(--font-display); font-weight: 400; font-size: clamp(2.15rem, 6.4vw, 5.25rem); letter-spacing: -0.01em; line-height: 1; }
+  & .eyebrow { color: var(--color-text-secondary); font: 400 12px/1.33 var(--font-mono); letter-spacing: 0; text-transform: uppercase; }
+  & code, & .break-value { font-family: var(--font-mono); font-size: 0.85em; color: #9281f7; }
+  & .brand__mark { border: 1px solid #292d30; border-radius: 6px; background: #000; box-shadow: none; color: #fff; font-family: var(--font-mono); }
+  & .brand__name { font-weight: 500; letter-spacing: 0; }
+
+  & .button { border-radius: 6px; font-weight: 500; }
+  & .button:hover:not(:disabled) { transform: none; }
+  & .button--primary { border-color: rgba(240, 240, 240, 0.4); background: transparent; color: #fff; }
+  & .button--primary:hover:not(:disabled) { border-color: #fff; background: rgba(255, 255, 255, 0.05); }
+  & .button--secondary, & .button--ghost { border-color: #292d30; background: transparent; color: #f0f0f0; }
+  & .button--secondary:hover:not(:disabled), & .button--ghost:hover:not(:disabled) { border-color: #6e727a; background: transparent; }
+  & .button--danger { border-color: rgba(255, 100, 101, 0.4); background: transparent; }
+  & .field__input, & .select { border-radius: 6px; background: #000; }
+  & .field__input:focus, & .select:focus { border-color: #f0f0f0; box-shadow: none; }
+
+  & .surface, & .state-panel, & .nft-card, & .collection-card, & .level-card, & .account-metrics div, & .status-item, & .payment-result { border-color: #292d30; background: #000; box-shadow: none; }
+  & .nft-card, & .collection-card { border-radius: 16px; }
+  & .nft-card:hover, & .collection-card:hover { border-color: #6e727a; box-shadow: none; transform: none; }
+  & .account-metrics div { border: 1px solid #292d30; }
+  & .profile-avatar__action { border: 1px solid #292d30; background: #000; color: #f0f0f0; }
+  & .modal-card, & .notification-panel, & .cookie-banner { border: 1px solid #292d30; background: #000; box-shadow: none; }
+  & .modal-backdrop { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(25px); }
+
+  & .app-header { border-bottom-color: #292d30; background: rgba(0, 0, 0, 0.9); }
+  & .main-nav a.active { border: 1px solid #f0f0f0; background: transparent; color: #fff; }
+  & .main-nav a { border: 1px solid transparent; }
+  & .kpi-card, & .dash-list { border-color: #292d30; background: #000; }
+  & .account-chip__avatar { background: #14181f; }
+  & .site-footer { border-top-color: #292d30; }
+  & .balance-chip, & .icon-button { border-color: #292d30; background: transparent; }
+  & .balance-chip { font-family: var(--font-mono); font-size: 0.8rem; }
+  & .tabs { border-color: #292d30; border-radius: 6px; background: #000; }
+  & .tabs button.active { background: #14181f; }
+  & .chip { border: 1px solid #292d30; background: transparent; color: #a1a4a5; }
+  & .chip--active { border-color: #f0f0f0; background: transparent; color: #fff; }
+  & .data-table { border-color: #292d30; border-radius: 16px; }
+  & .data-table__head { background: #000; font-family: var(--font-mono); letter-spacing: 0; }
+  & .data-table__row { border-top-color: #292d30; }
+  & .trust-list, & .trust-row + .trust-row { border-color: #292d30; }
+  & .progress { background: #14181f; }
+  & .progress__fill { background: #f0f0f0; }
+  & .landing__principles { border-top-color: #292d30; }
+  & .landing__principles svg { color: #a1a4a5; }
+  & .auth-art { border: 1px solid #292d30; background: #000; }
+  & .auth-art strong { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.01em; }
+  & .support-banner { background: #000; border-color: #292d30; }
+  & .support-banner__icon { background: linear-gradient(to bottom right, #9281f7, #9a54dc); color: #fff; }
+}
+
+/* =====================================================================
+   DALA — constellation floating on black velvet
+   ===================================================================== */
+:root[data-design="dala"] {
+  color-scheme: dark;
+  --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
+  --color-bg: #000; --color-bg-elevated: #000;
+  --color-surface-1: #000; --color-surface-2: #0d0d10; --color-surface-3: #18181d;
+  --color-border: rgba(255, 255, 255, 0.16); --color-border-soft: rgba(255, 255, 255, 0.09);
+  --color-text: #fff; --color-text-secondary: #bdbdbd; --color-text-muted: #9a9a9a;
+  --color-accent: #8052ff; --color-accent-hover: #9a75ff; --color-accent-soft: rgba(128, 82, 255, 0.16);
+  --color-positive: #2fc9a4; --color-negative: #ff6b7a; --color-warning: #ffb829; --color-info: #9a75ff;
+  --radius-sm: 12px; --radius-md: 24px; --radius-lg: 24px; --radius-xl: 24px;
+  --shadow-floating: none;
+
+  & body { background: #000; font-feature-settings: "ss01"; }
+  & .page-header h1, & .section-heading h2, & .auth-card h1 { font-weight: 400; letter-spacing: -0.04em; line-height: 1.05; }
+  & .page-header h1 { font-size: clamp(2rem, 4.4vw, 3.6rem); }
+  & .page-header p, & .landing__copy p, & .auth-card p { font-size: 1.05rem; font-weight: 200; }
+  & .auth-card h1 { font-size: clamp(2rem, 3.2vw, 2.9rem); }
+  & .landing__copy h1 { max-width: 12ch; font-weight: 400; font-size: clamp(2.15rem, 7.4vw, 6rem); letter-spacing: -0.04em; line-height: 1; }
+  & .eyebrow { color: #ffb829; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.025em; text-transform: uppercase; }
+  & .brand__mark { width: 2rem; height: 2rem; border: 0; background: linear-gradient(160deg, #8052ff 30%, #15846e); box-shadow: none; clip-path: polygon(50% 0, 100% 100%, 0 100%); font-size: 0; }
+  & .brand__name { font-weight: 400; letter-spacing: 0.02em; }
+
+  & .button { border-radius: 24px; font-size: 0.875rem; font-weight: 600; letter-spacing: 0.025em; text-transform: uppercase; }
+  & .button:hover:not(:disabled) { transform: none; }
+  & .button--primary { background: #8052ff; color: #fff; }
+  & .button--primary:hover:not(:disabled) { background: #9a75ff; }
+  & .button--secondary { border-color: rgba(255, 255, 255, 0.22); background: transparent; }
+  & .button--secondary:hover:not(:disabled), & .button--ghost:hover:not(:disabled) { background: rgba(255, 255, 255, 0.06); }
+  & .button--danger { background: transparent; border-color: rgba(255, 107, 122, 0.4); }
+  & .field__input, & .select { border-radius: 24px; background: transparent; }
+  & .field__input:focus, & .select:focus { border-color: #8052ff; box-shadow: 0 0 0 3px rgba(128, 82, 255, 0.2); }
+
+  & .surface, & .state-panel, & .level-card, & .account-metrics div, & .status-item, & .payment-result, & .nft-card, & .collection-card { border-color: rgba(255, 255, 255, 0.1); background: transparent; box-shadow: none; }
+  & .nft-card:hover, & .collection-card:hover { border-color: rgba(128, 82, 255, 0.6); box-shadow: none; transform: none; }
+  & .modal-card, & .notification-panel, & .cookie-banner { border: 1px solid rgba(255, 255, 255, 0.14); background: #000; box-shadow: none; }
+  & .modal-backdrop { background: rgba(0, 0, 0, 0.82); }
+
+  & .app-header { border-bottom-color: transparent; background: rgba(0, 0, 0, 0.72); }
+  & .main-nav a { text-transform: uppercase; letter-spacing: 0.025em; font-size: 0.75rem; font-weight: 600; border-radius: 24px; }
+  & .main-nav a.active { background: #8052ff; color: #fff; }
+  & .main-nav a:hover { background: rgba(255, 255, 255, 0.06); }
+  & .kpi-card, & .dash-list { border-color: rgba(255, 255, 255, 0.1); background: transparent; }
+  & .site-footer { border-top-color: rgba(255, 255, 255, 0.09); }
+  & .balance-chip, & .icon-button { border-color: rgba(255, 255, 255, 0.16); background: transparent; }
+  & .tabs { border-color: rgba(255, 255, 255, 0.16); background: transparent; border-radius: 24px; }
+  & .tabs button { border-radius: 20px; }
+  & .tabs button.active { background: #8052ff; color: #fff; }
+  & .chip { border: 1px solid rgba(255, 255, 255, 0.16); background: transparent; }
+  & .chip--active { border-color: #fff; background: #fff; color: #000; }
+  & .data-table { border-color: rgba(255, 255, 255, 0.12); }
+  & .data-table__head { background: transparent; }
+  & .data-table__row { border-top-color: rgba(255, 255, 255, 0.08); }
+  & .progress__fill { background: linear-gradient(90deg, #8052ff, #ffb829); }
+  & .landing__principles { border-top-color: transparent; }
+  & .landing__principles svg { color: #ffb829; }
+  & .auth-art { background: transparent; }
+  & .auth-art strong { font-weight: 400; letter-spacing: -0.04em; }
+  & .support-banner { background: transparent; }
+}
+
+/* =====================================================================
+   FACTORY — terminal war room at midnight
+   ===================================================================== */
+:root[data-design="factory"] {
+  color-scheme: dark;
+  --font-sans: "Geist Variable", Geist, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --color-bg: #101010; --color-bg-elevated: #101010;
+  --color-surface-1: #101010; --color-surface-2: #1d1a18; --color-surface-3: #292624;
+  --color-border: #3d3a39; --color-border-soft: #2a2725;
+  --color-text: #eeeeee; --color-text-secondary: #b8b3b0; --color-text-muted: #8a8380;
+  --color-accent: #ee6018; --color-accent-hover: #ff7a35; --color-accent-soft: rgba(238, 96, 24, 0.12);
+  --color-positive: #a0ca92; --color-negative: #f0664f; --color-warning: #ee6018; --color-info: #b8b3b0;
+  --radius-sm: 3px; --radius-md: 3px; --radius-lg: 10px; --radius-xl: 20px;
+  --shadow-floating: none;
+
+  & body { background: #101010; font-feature-settings: normal; }
+  & .page-header h1, & .section-heading h2, & .auth-card h1 { font-weight: 400; letter-spacing: -0.03em; line-height: 1.1; }
+  & .landing__copy h1 { max-width: 12ch; font-weight: 400; font-size: clamp(2.15rem, 6.4vw, 4.5rem); letter-spacing: -0.04em; line-height: 1; }
+  & .eyebrow, & .data-table__head, & .os-table__head, & .account-metrics span, & .status-pill { font-family: var(--font-mono); font-weight: 400; letter-spacing: -0.02em; text-transform: uppercase; }
+  & .eyebrow { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--color-text-secondary); font-size: 0.75rem; }
+  & .eyebrow::before { width: 6px; height: 6px; border-radius: 50%; background: #ee6018; content: ""; }
+  & .eyebrow svg { display: none; }
+  & code, & .break-value { font-family: var(--font-mono); font-size: 0.85em; }
+  & .brand__mark { border: 1px solid #3d3a39; border-radius: 3px; background: transparent; box-shadow: none; color: #eee; font-family: var(--font-mono); font-weight: 400; }
+  & .brand__name { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 400; letter-spacing: 0.14em; }
+
+  & .button { border-radius: 3px; font-weight: 400; }
+  & .button:hover:not(:disabled) { transform: none; }
+  & .button--primary { background: #fafafa; color: #101010; }
+  & .button--primary:hover:not(:disabled) { background: #fff; }
+  & .button--secondary { border-color: transparent; background: #1f1d1c; color: #eee; }
+  & .button--secondary:hover:not(:disabled) { background: #292624; }
+  & .button--ghost { border-color: #3d3a39; border-radius: 0; background: transparent; }
+  & .button--ghost:hover:not(:disabled) { border-color: #fafafa; background: transparent; color: #fafafa; }
+  & .button--danger { background: #1f1d1c; }
+  & .field__input, & .select { border-radius: 3px; background: #101010; }
+  & .field__input:focus, & .select:focus { border-color: #eee; box-shadow: none; }
+  & .field__label { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 400; letter-spacing: -0.02em; text-transform: uppercase; color: var(--color-text-muted); }
+
+  & .surface, & .state-panel, & .nft-card, & .collection-card, & .level-card, & .status-item { border-color: #2a2725; background: transparent; box-shadow: none; }
+  & .nft-card, & .collection-card { border-radius: 10px; }
+  & .nft-card:hover, & .collection-card:hover { border-color: #8a8380; box-shadow: none; transform: none; }
+  & .account-metrics div { border: 1px solid #2a2725; border-radius: 0; background: transparent; }
+  & .account-metrics strong { font-size: 2rem; font-weight: 400; letter-spacing: -0.03em; }
+  & .notification-panel, & .cookie-banner { border: 1px solid #3d3a39; background: #101010; box-shadow: none; }
+  & .modal-backdrop { background: rgba(16, 16, 16, 0.88); }
+
+  /* The signature move: a light card floating on the dark ground. Tokens are re-scoped so children restyle themselves. */
+  & .auth-card, & .modal-card, & .payment-result {
+    --color-text: #101010; --color-text-secondary: #4d4947; --color-text-muted: #6f6a67;
+    --color-border: #c9c5c2; --color-border-soft: #d6d2cf;
+    --color-surface-1: #f7f6f5; --color-surface-2: #e3e0dd; --color-surface-3: #d6d2cf;
+    --color-accent-soft: rgba(238, 96, 24, 0.14); --color-accent-hover: #c94e0d;
+    border-color: transparent; border-radius: 10px; background: #eeeeee; color: #101010; box-shadow: none;
+  }
+  & .auth-card { margin: 1rem; }
+  & .auth-card .brand__mark, & .modal-card .brand__mark { border-color: var(--color-text); color: var(--color-text); }
+  & .auth-card .button--primary, & .modal-card .button--primary, & .payment-result .button--primary { background: #101010; color: #eeeeee; }
+  & .auth-card .button--secondary, & .modal-card .button--secondary, & .payment-result .button--secondary { background: #dcd8d5; color: #101010; }
+  & .auth-card .button--ghost, & .modal-card .button--ghost, & .payment-result .button--ghost { border-color: #b8b3b0; color: #101010; }
+  & .auth-card .button--ghost:hover:not(:disabled), & .modal-card .button--ghost:hover:not(:disabled), & .payment-result .button--ghost:hover:not(:disabled) { border-color: #101010; color: #101010; }
+  & .auth-card .button--secondary:hover:not(:disabled), & .modal-card .button--secondary:hover:not(:disabled), & .payment-result .button--secondary:hover:not(:disabled) { background: #cfcac7; }
+  & .auth-card .select, & .modal-card .select, & .payment-result .select { background: #fafafa; color: #101010; }
+  & .auth-card .button--danger, & .modal-card .button--danger { background: #e3e0dd; color: #b8341f; }
+  & .auth-card .field__input, & .modal-card .field__input, & .payment-result .field__input { background: #fafafa; }
+  & .payment-result .support-banner, & .modal-card .support-banner { background: #e3e0dd; }
+
+  & .app-header { border-bottom: 1px solid #1d1a18; background: #101010; backdrop-filter: none; }
+  & .main-nav a { border-radius: 3px; font-size: 0.8125rem; }
+  & .main-nav a.active { background: #eee; color: #101010; }
+  & .main-nav a:hover:not(.active) { background: #1d1a18; }
+  & .kpi-card, & .dash-list { border-color: #2a2725; border-radius: 0; background: transparent; }
+  & .kpi-card > span { font-family: var(--font-mono); letter-spacing: -0.02em; }
+  & .site-footer { border-top-color: #1d1a18; font-family: var(--font-mono); font-size: 0.75rem; }
+  & .balance-chip, & .icon-button { border-color: #2a2725; background: transparent; border-radius: 3px; }
+  & .balance-chip { font-family: var(--font-mono); font-size: 0.8rem; }
+  & .tabs { border-color: #3d3a39; border-radius: 3px; background: transparent; }
+  & .tabs button { border-radius: 2px; }
+  & .tabs button.active { background: #eee; color: #101010; }
+  & .chip { border: 1px solid #3d3a39; border-radius: 3px; background: transparent; font-family: var(--font-mono); font-weight: 400; }
+  & .chip--active { background: #eee; }
+  & .data-table { border-color: #2a2725; }
+  & .data-table__head { background: transparent; }
+  & .data-table__row { border-top-color: #2a2725; }
+  & .status-pill { padding: 0.1rem 0.5rem 0.1rem 0.4rem; border-radius: 3px; font-size: 0.6875rem; }
+  & .progress { border-radius: 0; background: #1d1a18; }
+  & .progress__fill { background: #a0ca92; border-radius: 0; }
+  & .landing__principles { border-top-color: #2a2725; }
+  & .landing__principles svg { color: #ee6018; }
+  & .auth-art { border: 1px solid #2a2725; background: #0d0d0d; }
+  & .auth-art strong { font-weight: 400; letter-spacing: -0.04em; }
+  & .support-banner { background: #1d1a18; border-color: transparent; }
+  & .landing__visual { min-height: 26rem; }
+}
+
+@media (max-width: 479px) {
+  .design-switcher { gap: 0.25rem; padding-inline: 0.5rem; }
+  .design-switcher__label { display: none; }
+  .design-switcher__btn { padding: 0 0.5rem; }
+}

@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { CollectionPage } from "./collection-page";
@@ -66,11 +66,13 @@ describe("CollectionPage", () => {
     expect(screen.queryByText("Максимальная цена")).not.toBeInTheDocument();
   });
 
-  it("shows real price and ownership stats when they are present", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ name: "Neon Foxes", author: "Studio A", in_own: 2, min_price: 10, max_price: 500, nfts: [makeNft(1)] })));
+  it("shows real price stats, and counts your NFTs from your portfolio instead of the backend in_own", async () => {
+    const collection = { name: "Neon Foxes", author: "Studio A", in_own: 99, min_price: 10, max_price: 500, nfts: [makeNft(1)] };
+    const ownedRecord = (id: number, collectionId: number) => ({ id, status: 1, sale_price: 5, pic: { id, collection_id: collectionId, image: "", number: id, price: 3, collection: { name: "Neon Foxes", blockchain: "" } } });
+    vi.stubGlobal("fetch", vi.fn((input: string) => Promise.resolve(new URL(input, "http://localhost").pathname === "/api/my_nfts" ? jsonResponse([ownedRecord(1, 1), ownedRecord(2, 1), ownedRecord(3, 2)]) : jsonResponse(collection))));
     renderCollectionPage();
     await screen.findByRole("heading", { name: "Neon Foxes" });
-    expect(screen.getByText("У вас")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("У вас").nextSibling?.textContent).toBe("2"));
     expect(screen.getByText("Минимальная цена")).toBeInTheDocument();
     expect(screen.getByText("Максимальная цена")).toBeInTheDocument();
   });

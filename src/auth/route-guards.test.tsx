@@ -30,7 +30,7 @@ describe("auth route guards", () => {
   it("redirects an authenticated user away from login", async () => {
     const user = { id: 1, email: "user@example.com", username: null, avatar: "", balance: 0, currency: "USD", active: true, verificated: false, can_withdraw: true, turnover: 0, created: "", minimal_deposit: 0 };
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(user)));
-    render(<MemoryRouter initialEntries={["/auth/login"]}><AuthProvider><Routes><Route path="/auth/login" element={<PublicOnlyRoute><span>login</span></PublicOnlyRoute>} /><Route path="/client/main" element={<span>market</span>} /></Routes></AuthProvider></MemoryRouter>);
+    render(<MemoryRouter initialEntries={["/auth/login"]}><AuthProvider><Routes><Route path="/auth/login" element={<PublicOnlyRoute><span>login</span></PublicOnlyRoute>} /><Route path="/client/dashboard" element={<span>market</span>} /></Routes></AuthProvider></MemoryRouter>);
     await waitFor(() => expect(screen.getByText("market")).toBeInTheDocument());
   });
 });

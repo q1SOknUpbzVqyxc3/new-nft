@@ -11,7 +11,7 @@ function Row({ icon, label, value, tone }: { icon: ReactNode; label: string; val
 export function AccountStatus({ user }: { user: User }) {
   return (
     <ul className="trust-list" aria-label="Статус аккаунта">
-      <Row icon={<UserCheck size={16} />} label="Аккаунт" value={user.is_banned ? "Заблокирован" : user.active ? "Активен" : "Не активирован"} tone={user.is_banned ? "bad" : user.active ? "ok" : "neutral"} />
+      {user.is_banned ? <Row icon={<UserCheck size={16} />} label="Аккаунт" value="Заблокирован" tone="bad" /> : null}
       <Row icon={user.verificated ? <BadgeCheck size={16} /> : <CircleDashed size={16} />} label="Верификация" value={user.verificated ? "Верифицирован" : "Не верифицирован"} tone={user.verificated ? "ok" : "neutral"} />
       {user.aml_verified === undefined ? null : <Row icon={<ShieldCheck size={16} />} label="AML" value={user.aml_verified ? "Пройден" : "Не пройден"} tone={user.aml_verified ? "ok" : "neutral"} />}
       <Row icon={user.can_withdraw ? <Wallet size={16} /> : <ShieldOff size={16} />} label="Вывод средств" value={user.can_withdraw ? "Доступен" : "Ограничен"} tone={user.can_withdraw ? "ok" : "bad"} />

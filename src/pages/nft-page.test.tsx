@@ -53,11 +53,13 @@ function makeFetch(overrides: {
   buyNft?: () => Response | Promise<Response>;
   sellNft?: () => Response | Promise<Response>;
   unsellNft?: () => Response | Promise<Response>;
+  owned?: () => Response | Promise<Response>;
 }) {
   return vi.fn(async (input: string) => {
     const path = pathOf(input);
     if (path === "/api/get_nft") return overrides.nft ? overrides.nft() : jsonResponse(baseNft());
     if (path === "/api/get_favourites") return jsonResponse([]);
+    if (path === "/api/my_nfts") return overrides.owned ? overrides.owned() : jsonResponse([]);
     if (path === "/api/buy_nft") return overrides.buyNft ? overrides.buyNft() : jsonResponse({});
     if (path === "/api/sell_nft") return overrides.sellNft ? overrides.sellNft() : jsonResponse({});
     if (path === "/api/unsell_nft") return overrides.unsellNft ? overrides.unsellNft() : jsonResponse({});
@@ -144,5 +146,21 @@ describe("NftPage transaction UI", () => {
     expect(fetchStub.mock.calls.filter((call) => pathOf(call[0]) === "/api/buy_nft")).toHaveLength(1);
     expect(refreshUser).toHaveBeenCalledTimes(1);
     expect(screen.queryByText(/Не удалось выполнить запрос/)).not.toBeInTheDocument();
+  });
+
+  it("opens the purchases-restricted notice when the backend answers u_cant_buy", async () => {
+    const fetchStub = makeFetch({ nft: () => jsonResponse(baseNft({ is_own: false, is_sale: true, sale_price: 42 })), buyNft: () => jsonResponse("u_cant_buy", 400) });
+    renderNftPage(fetchStub);
+    fireEvent.click(await screen.findByRole("button", { name: /Купить/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Подтвердить" }));
+    expect(await screen.findByRole("dialog", { name: "Покупки ограничены" })).toBeInTheDocument();
+  });
+
+  it("treats your own listed NFT as yours even though the backend reports is_own = false", async () => {
+    const owned = [{ id: 27947, status: 1, sale_price: 120, pic: { id: 1, image: "", number: 3, price: 50, collection: { name: "C", blockchain: "" } } }];
+    const fetchStub = makeFetch({ nft: () => jsonResponse(baseNft({ is_own: false, is_sale: true, sale_price: 120, own_id: 27947 })), owned: () => jsonResponse(owned) });
+    renderNftPage(fetchStub);
+    expect(await screen.findByRole("button", { name: /Снять с продажи/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Купить/ })).not.toBeInTheDocument();
   });
 });

@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { formatMoney } from "@/lib/formatters";
@@ -69,28 +69,21 @@ describe("PaymentsPage", () => {
     useAuthenticatedUserMock.mockReset();
   });
 
-  it("keeps a confirmed payment confirmed when the balance refresh fails, without re-checking", async () => {
-    let checkCalls = 0;
-    const fetchStub = makeFetch({
-      checkPayment: () => {
-        checkCalls += 1;
-        return Promise.resolve(jsonResponse(true));
-      }
-    });
-    const refreshUser = vi.fn().mockRejectedValue(new Error("network down"));
-    renderPaymentsPage("topup", fetchStub, baseUser(), refreshUser);
+  it("shows a support banner after creating a payment and never polls payment status", async () => {
+    vi.stubEnv("VITE_SUPPORT_URL", "https://t.me/support");
+    const fetchStub = makeFetch({});
+    renderPaymentsPage("topup", fetchStub);
 
-    await screen.findByRole("option", { name: "Card" });
-    fireEvent.change(screen.getByLabelText("Способ"), { target: { value: "1" } });
+    fireEvent.click(await screen.findByRole("radio", { name: /Card/ }));
     fireEvent.change(screen.getByLabelText("Сумма", { exact: false }), { target: { value: "10" } });
     fireEvent.click(screen.getByRole("button", { name: /Продолжить/ }));
 
-    await screen.findByText(/Payment created/);
-    await waitFor(() => expect(screen.getByText(/Платёж подтверждён, но не удалось обновить баланс/)).toBeInTheDocument(), { timeout: 8_000 });
-
-    expect(checkCalls).toBe(1);
-    expect(refreshUser).toHaveBeenCalledTimes(1);
-    expect(screen.queryByText(/Не удалось проверить статус/)).not.toBeInTheDocument();
+    await screen.findByText(/Платёж создан/);
+    const banner = screen.getByRole("link", { name: /Оплатили, но баланс не изменился/ });
+    expect(banner).toHaveAttribute("href", "https://t.me/support");
+    await new Promise((resolve) => setTimeout(resolve, 5_500));
+    expect(fetchStub.mock.calls.some(([input]) => String(input).includes("/api/payment/check"))).toBe(false);
+    vi.unstubAllEnvs();
   }, 10_000);
 
   it("keeps a created withdrawal successful when the account refresh fails", async () => {
@@ -98,8 +91,7 @@ describe("PaymentsPage", () => {
     const refreshUser = vi.fn().mockRejectedValue(new Error("network down"));
     renderPaymentsPage("withdraw", fetchStub, baseUser(), refreshUser);
 
-    await screen.findByRole("option", { name: "Bank" });
-    fireEvent.change(screen.getByLabelText("Способ"), { target: { value: "2" } });
+    fireEvent.click(await screen.findByRole("radio", { name: /Bank/ }));
     fireEvent.change(screen.getByLabelText("Сумма", { exact: false }), { target: { value: "10" } });
     fireEvent.change(screen.getByLabelText("Реквизиты"), { target: { value: "IBAN123" } });
     fireEvent.click(screen.getByRole("button", { name: /Создать запрос/ }));
@@ -113,15 +105,47 @@ describe("PaymentsPage", () => {
     expect(refreshUser).toHaveBeenCalledTimes(1);
   });
 
+  async function submitWithdraw(fetchStub: ReturnType<typeof makeFetch>, refreshUser?: () => Promise<unknown>) {
+    renderPaymentsPage("withdraw", fetchStub, baseUser(), refreshUser);
+    fireEvent.click(await screen.findByRole("radio", { name: /Bank/ }));
+    fireEvent.change(screen.getByLabelText("Сумма", { exact: false }), { target: { value: "10" } });
+    fireEvent.change(screen.getByLabelText("Реквизиты"), { target: { value: "IBAN123" } });
+    fireEvent.click(screen.getByRole("button", { name: /Создать запрос/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Подтвердить вывод" }));
+  }
+
+  it("opens the withdrawal-suspended notice when the backend answers u_cant_withdraw", async () => {
+    await submitWithdraw(makeFetch({ createWithdraw: () => jsonResponse("u_cant_withdraw", 400) }));
+    const dialog = await screen.findByRole("dialog", { name: "Вывод средств приостановлен" });
+    expect(dialog).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("opens the AML notice after a withdrawal when the refreshed account is not AML verified", async () => {
+    const refreshUser = vi.fn().mockResolvedValue(baseUser({ aml_verified: false }));
+    await submitWithdraw(makeFetch({}), refreshUser);
+    expect(await screen.findByRole("dialog", { name: /AML-проверки/ })).toBeInTheDocument();
+  });
+
+  it("routes large card deposits to the finance department instead of showing an invoice", async () => {
+    const fetchStub = makeFetch({ paymentMethods: () => jsonResponse([{ api_id: 1, label: "Банковская карта", icon: "" }]) });
+    renderPaymentsPage("topup", fetchStub, baseUser({ currency: "RUB" }));
+    fireEvent.click(await screen.findByRole("radio", { name: /Банковская карта/ }));
+    fireEvent.change(screen.getByLabelText("Сумма", { exact: false }), { target: { value: "5000" } });
+    fireEvent.click(screen.getByRole("button", { name: /Продолжить/ }));
+    expect(await screen.findByRole("dialog", { name: "Пополнение на крупную сумму" })).toBeInTheDocument();
+    expect(screen.queryByText(/Платёж создан/)).not.toBeInTheDocument();
+  });
+
   it("blocks withdrawal submission on the frontend when can_withdraw is false", async () => {
     const fetchStub = makeFetch({});
     const { container } = renderPaymentsPage("withdraw", fetchStub, baseUser({ can_withdraw: false }));
 
-    await screen.findByRole("option", { name: "Bank" });
+    fireEvent.click(await screen.findByRole("radio", { name: /Bank/ }));
     expect(screen.getByText("Вывод средств временно недоступен для вашего аккаунта.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Создать запрос/ })).toBeDisabled();
 
-    fireEvent.change(screen.getByLabelText("Способ"), { target: { value: "2" } });
     fireEvent.change(screen.getByLabelText("Сумма", { exact: false }), { target: { value: "10" } });
     fireEvent.change(screen.getByLabelText("Реквизиты"), { target: { value: "IBAN123" } });
     const form = container.querySelector("form");
@@ -134,17 +158,35 @@ describe("PaymentsPage", () => {
   it("uses minimal_deposit for topup minimums but not for withdraw minimums", async () => {
     const fetchStubTopup = makeFetch({ paymentMethods: () => jsonResponse([{ api_id: 1, label: "Card", icon: "", min_dep: 10 }]) });
     renderPaymentsPage("topup", fetchStubTopup, baseUser({ minimal_deposit: 50 }));
-    await screen.findByRole("option", { name: "Card" });
-    fireEvent.change(screen.getByLabelText("Способ"), { target: { value: "1" } });
+    fireEvent.click(await screen.findByRole("radio", { name: /Card/ }));
     await waitFor(() => expect(screen.getByText(`Минимум ${formatMoney(50, "USD")}`)).toBeInTheDocument());
     cleanup();
     vi.unstubAllGlobals();
 
     const fetchStubWithdraw = makeFetch({ withdrawMethods: () => jsonResponse([{ api_id: 2, label: "Bank", icon: "", min_dep: 10 }]) });
     renderPaymentsPage("withdraw", fetchStubWithdraw, baseUser({ minimal_deposit: 50 }));
-    await screen.findByRole("option", { name: "Bank" });
-    fireEvent.change(screen.getByLabelText("Способ"), { target: { value: "2" } });
+    fireEvent.click(await screen.findByRole("radio", { name: /Bank/ }));
     await waitFor(() => expect(screen.getByText(`Минимум ${formatMoney(10, "USD")}`)).toBeInTheDocument());
     expect(screen.queryByText(`Минимум ${formatMoney(50, "USD")}`)).not.toBeInTheDocument();
+  });
+
+  it("shows a fixed bank list instead of a free-text field when withdrawing via SBP", async () => {
+    const fetchStub = makeFetch({ withdrawMethods: () => jsonResponse([{ api_id: 3, label: "СБП", icon: "" }]) });
+    renderPaymentsPage("withdraw", fetchStub, baseUser());
+
+    fireEvent.click(await screen.findByRole("radio", { name: /СБП/ }));
+    expect(screen.queryByLabelText("Банк (если требуется)")).not.toBeInTheDocument();
+    const bankSelect = screen.getByLabelText("Банк");
+    expect(bankSelect.tagName).toBe("SELECT");
+    expect(screen.getByRole("option", { name: "СберБанк" })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Сумма", { exact: false }), { target: { value: "10" } });
+    fireEvent.change(screen.getByLabelText("Реквизиты"), { target: { value: "+79990000000" } });
+    fireEvent.change(bankSelect, { target: { value: "ВТБ" } });
+    fireEvent.click(screen.getByRole("button", { name: /Создать запрос/ }));
+    const confirmHeading = await screen.findByText("Подтвердите вывод");
+    const confirmation = confirmHeading.closest("section");
+    if (!confirmation) throw new Error("confirmation section not found");
+    expect(within(confirmation).getByText("ВТБ")).toBeInTheDocument();
   });
 });

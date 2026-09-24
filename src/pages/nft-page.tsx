@@ -2,13 +2,19 @@ import { ArrowLeft, Blocks, CheckCircle2, Heart, ShoppingBag, Tag, Undo2 } from 
 import { type FormEvent, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuthenticatedUser } from "@/auth/auth-context";
+import { ActivityFeed } from "@/components/activity-feed";
+import { NftAuction, NftFacts } from "@/components/nft-market";
+import { NoticeModal } from "@/components/notice-modal";
 import { Button } from "@/components/ui/button";
 import { ErrorState, LoadingState } from "@/components/ui/page-state";
 import { SafeMedia } from "@/components/ui/safe-media";
 import { TextField } from "@/components/ui/text-field";
+import { ApiError } from "@/lib/api/client";
 import { api } from "@/lib/api/services";
+import { type Notice, notices } from "@/lib/notices";
 import { getUserFacingError } from "@/lib/api/errors";
 import { useApiResource } from "@/lib/hooks/use-api-resource";
+import { useOptionalResource } from "@/lib/hooks/use-optional-resource";
 import { formatDateTime, formatMoney } from "@/lib/formatters";
 
 type TransactionIntent = { action: "buy" | "unsell"; price: number } | { action: "sell"; price: number };
@@ -45,9 +51,13 @@ export function NftPage() {
   const { nftId = "" } = useParams();
   const { refreshUser } = useAuthenticatedUser();
   const nft = useApiResource(nftId ? `nft:${nftId}` : null, (signal) => api.getNft(nftId, signal));
+  const extra = useOptionalResource(nftId ? `nft-extra:${nftId}` : null, (signal) => api.getNftExtra(nftId, signal));
   const favourites = useApiResource("favourites", (signal) => api.getFavourites(signal));
+  // The backend reports is_own = false for your own NFT once it is listed for sale, so ownership is also read from your portfolio.
+  const owned = useApiResource("owned-nfts", (signal) => api.getOwnedNfts(signal));
   const [pending, setPending] = useState(false);
   const [favouritePending, setFavouritePending] = useState(false);
+  const [notice, setNotice] = useState<Notice | null>(null);
   const [feedback, setFeedback] = useState<{ type: "success" | "error" | "warning"; text: string } | null>(null);
   const [intent, setIntent] = useState<TransactionIntent | null>(null);
   const isFavourite = useMemo(() => favourites.status === "success" && favourites.data.some((value) => getFavouriteId(value) === nftId), [favourites, nftId]);
@@ -66,7 +76,10 @@ export function NftPage() {
       if (action === "unsell" && nft.data.own_id !== undefined) await api.unsellNft(String(nft.data.own_id));
     } catch (error) {
       setPending(false);
-      setFeedback({ type: "error", text: getUserFacingError(error) });
+      if (action === "buy" && error instanceof ApiError && error.code === "u_cant_buy") {
+        setIntent(null);
+        setNotice(notices.buyBlocked);
+      } else setFeedback({ type: "error", text: getUserFacingError(error) });
       return;
     }
 
@@ -103,9 +116,10 @@ export function NftPage() {
     }
   }
 
-  if (nft.status === "loading") return <main className="container page"><LoadingState label="Загружаем NFT" /></main>;
+  if (nft.status === "loading" || owned.status === "loading") return <main className="container page"><LoadingState label="Загружаем NFT" /></main>;
   if (nft.status === "error") return <main className="container page"><ErrorState message={getUserFacingError(nft.error)} onRetry={nft.refresh} /></main>;
-  const item = nft.data;
+  const ownedRecord = owned.status === "success" ? owned.data.find((record) => String(record.pic.id) === nftId) : undefined;
+  const item = { ...nft.data, is_own: nft.data.is_own || ownedRecord !== undefined, ...(nft.data.own_id === undefined && ownedRecord ? { own_id: ownedRecord.id } : {}) };
   const actionKind = getNftActionKind(item);
   const sparklinePoints = buildSparklinePoints(item.prices);
 
@@ -138,7 +152,8 @@ export function NftPage() {
             </div>
             {intent ? <section className="transaction-confirmation" aria-label="Подтверждение операции"><strong>{intent.action === "buy" ? "Подтвердите покупку" : intent.action === "sell" ? "Подтвердите размещение" : "Снять NFT с продажи?"}</strong><p>{item.collection_name} #{item.number} · {item.blockchain || "сеть не указана"}{intent.action !== "unsell" ? ` · ${formatMoney(intent.price, item.currency)}` : ""}</p><div><Button disabled={pending} onClick={() => void transact(intent.action, intent.price)}>{pending ? "Выполняем…" : "Подтвердить"}</Button><Button variant="ghost" disabled={pending} onClick={() => setIntent(null)}>Отмена</Button></div></section> : null}
           </div>
-          <dl className="asset-meta"><div><dt>Token ID</dt><dd>{item.number}</dd></div></dl>
+          <NftAuction nftId={nftId} item={item} onChanged={() => { nft.refresh(); owned.refresh(); void refreshUser().catch(() => undefined); }} onBlocked={() => setNotice(notices.buyBlocked)} />
+          <NftFacts item={item} extra={extra.state === "ready" ? extra.data : null} unavailable={extra.state === "unavailable"} />
         </section>
       </div>
       <section className="asset-history">
@@ -150,6 +165,8 @@ export function NftPage() {
           </>
         ) : <div className="state-panel">История цены пока недоступна.</div>}
       </section>
+      <ActivityFeed scope={{ nftId }} title="Активность NFT" />
+      {notice ? <NoticeModal notice={notice} onClose={() => setNotice(null)} /> : null}
     </main>
   );
 }

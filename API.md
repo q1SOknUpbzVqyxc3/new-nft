@@ -197,3 +197,8 @@ Swagger описывает request parameters, но response schemas опубл�
 - `/api/get_collection_nft` returns `count` in addition to `nfts,name,author,min_price,max_price,in_own`.
 - `/api/get_nft` returns `created,status` in addition to documented fields.
 - Missing endpoints (sessions, 2FA, offers, auctions, analytics, creator, achievements): see `docs/NFT_PRODUCT_GAPS.md`.
+
+
+## Предлагаемый контракт для новых функций маркетплейса
+
+Актуальное ТЗ для бэкенда — `back.md` (ручки, поля, правила), события ленты — `activity_feed.md`. Сюда вошли только ручки, которые вызывает фронтенд: `collection/stats`, `nft/details`, `auctions`, `nft/auction`, `nft/auction/bid`, `nft/auction/buy_now`, `portfolio`, `portfolio/history`, `rankings`, `activity-feed`, а также 2FA, сессии и popup-уведомления из арбитражного бэкенда. Офферы, продажа между пользователями, авторы и достижения на бэкенде не планируются и на фронтенде удалены (достижения считаются локально).

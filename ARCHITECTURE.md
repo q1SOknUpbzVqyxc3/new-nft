@@ -53,12 +53,12 @@ React Router сохраняет production URL contract:
 
 - `/`, `/c/:code`;
 - `/auth/login`, `/auth/signup`, `/auth/reset-password`;
-- `/client/main`;
+- `/client/dashboard` (обзор, страница по умолчанию после входа), `/client/main`;
 - `/client/collection/:collectionId`;
 - `/client/collectible/:nftId`;
 - `/client/owns`;
-- `/client/topup`, `/client/withdraw`;
-- `/client/profile`, `/client/profile/security`, `/client/profile/settings`, `/client/profile/history`.
+- `/client/finance?tab=topup|withdraw|history` (`/client/topup`, `/client/withdraw` и `/client/profile/history` перенаправляют сюда);
+- `/client/profile`, `/client/profile/security`, `/client/profile/devices`, `/client/profile/settings` (раздел «Настройки»); история NFT — `/client/owns?tab=history`.
 
 Production hosting должен отдавать `index.html` для неизвестных client routes.
 

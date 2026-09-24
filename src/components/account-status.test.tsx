@@ -16,14 +16,12 @@ describe("AccountStatus", () => {
     render(<AccountStatus user={user()} />);
     expect(screen.getByText("Верифицирован")).toBeInTheDocument();
     expect(screen.getByText("Доступен")).toBeInTheDocument();
-    expect(screen.getByText("Активен")).toBeInTheDocument();
   });
 
   it("uses a neutral unverified label and marks restricted withdrawals", () => {
     render(<AccountStatus user={user({ verificated: false, can_withdraw: false, active: false })} />);
     expect(screen.getByText("Не верифицирован")).toBeInTheDocument();
     expect(screen.getByText("Ограничен")).toBeInTheDocument();
-    expect(screen.getByText("Не активирован")).toBeInTheDocument();
   });
 
   it("renders AML only when the backend provides it, and never invents it", () => {

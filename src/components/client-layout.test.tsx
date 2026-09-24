@@ -45,16 +45,27 @@ describe("ClientLayout", () => {
     document.body.style.overflow = "";
   });
 
-  it("renders primary marketplace navigation, balance, and global search", () => {
+  it("renders the section navigation, balance, global search and account chip", () => {
     renderLayout();
+    expect(screen.getByRole("link", { name: "Обзор" })).toHaveAttribute("href", "/client/dashboard");
     expect(screen.getByRole("link", { name: "Маркет" })).toHaveAttribute("href", "/client/main");
+    expect(screen.getByRole("link", { name: "Аукционы" })).toHaveAttribute("href", "/client/auctions");
     expect(screen.getByRole("link", { name: "Мои NFT" })).toHaveAttribute("href", "/client/owns");
-    expect(screen.getByRole("link", { name: "История" })).toHaveAttribute("href", "/client/profile/history");
+    expect(screen.getByRole("link", { name: "Финансы" })).toHaveAttribute("href", "/client/finance");
+    expect(screen.getByRole("link", { name: "Настройки" })).toHaveAttribute("href", "/client/profile");
     expect(screen.getByRole("textbox", { name: "Поиск по маркетплейсу" })).toBeInTheDocument();
     expect(screen.getByText("42 $")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Профиль" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /user@example.com/ })).toHaveAttribute("href", "/client/profile");
     expect(screen.getByRole("button", { name: "Уведомления" })).toBeInTheDocument();
     expect(screen.getByText("market content")).toBeInTheDocument();
+  });
+
+  it("marks the current section and shows the trust badges", () => {
+    renderLayout();
+    expect(screen.getByRole("link", { name: "Маркет" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Обзор" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("img", { name: "Аккаунт верифицирован" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Вывод доступен" })).toBeInTheDocument();
   });
 
   it("shows the activation gate instead of the marketplace shell for inactive accounts", () => {

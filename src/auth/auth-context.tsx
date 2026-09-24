@@ -14,9 +14,28 @@ type SignupInput = { email: string; password: string; inviteCode: string; langua
 type AuthContextValue = AuthState & {
   login: (input: LoginInput) => Promise<User>;
   signup: (input: SignupInput) => Promise<User>;
+  loginWithTwoFactor: (preAuthToken: string, code: string, remember: boolean) => Promise<User>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<User | null>;
 };
+
+/** Thrown by `login` when the account has 2FA enabled; the caller then collects a code and calls `loginWithTwoFactor`. */
+export class TwoFactorRequiredError extends Error {
+  readonly preAuthToken: string;
+
+  constructor(preAuthToken: string) {
+    super("two_factor_required");
+    this.name = "TwoFactorRequiredError";
+    this.preAuthToken = preAuthToken;
+  }
+}
+
+function extractPreAuthToken(result: unknown) {
+  if (!result || typeof result !== "object") return null;
+  const record = result as Record<string, unknown>;
+  const token = record["pre_auth_token"] ?? record["preAuthToken"];
+  return typeof token === "string" && token ? token : null;
+}
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -60,7 +79,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (input: LoginInput) => {
-    await api.login(input.email, input.password, input.remember);
+    const result = await api.login(input.email, input.password, input.remember);
+    const preAuthToken = extractPreAuthToken(result);
+    if (preAuthToken) throw new TwoFactorRequiredError(preAuthToken);
+    const user = await api.getUser();
+    setState({ status: "authenticated", user, error: null });
+    return user;
+  }, []);
+
+  const loginWithTwoFactor = useCallback(async (preAuthToken: string, code: string, remember: boolean) => {
+    await api.loginWithTwoFactor(preAuthToken, code, remember);
     const user = await api.getUser();
     setState({ status: "authenticated", user, error: null });
     return user;
@@ -83,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshSession = useCallback(() => restoreSession(), [restoreSession]);
-  const value = useMemo<AuthContextValue>(() => ({ ...state, login, signup, logout, refreshSession }), [state, login, signup, logout, refreshSession]);
+  const value = useMemo<AuthContextValue>(() => ({ ...state, login, loginWithTwoFactor, signup, logout, refreshSession }), [state, login, loginWithTwoFactor, signup, logout, refreshSession]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

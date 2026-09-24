@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { ErrorState, LoadingState } from "@/components/ui/page-state";
 import { getUserFacingError } from "@/lib/api/errors";
+import { DEFAULT_CLIENT_ROUTE } from "@/lib/navigation";
 import { useAuth } from "./auth-context";
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -27,6 +28,6 @@ export function PublicOnlyRoute({ children }: { children: ReactNode }) {
     return <main className="container page">{auth.error ? <ErrorState message={getUserFacingError(auth.error)} onRetry={() => void auth.refreshSession().catch(() => undefined)} /> : <LoadingState label="Проверяем сессию" />}</main>;
   }
 
-  if (auth.status === "authenticated") return <Navigate to="/client/main" replace />;
+  if (auth.status === "authenticated") return <Navigate to={DEFAULT_CLIENT_ROUTE} replace />;
   return children;
 }
