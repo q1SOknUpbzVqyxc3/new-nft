@@ -11,6 +11,7 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/ui/page-state
 import { SafeMedia } from "@/components/ui/safe-media";
 import { getUserFacingError } from "@/lib/api/errors";
 import { api } from "@/lib/api/services";
+import { currencyToRub, rubToCurrency } from "@/lib/currency";
 import { getFinanceStatusLabel, getFinanceStatusTone, getFinanceTypeLabel, isExpiredPending, pendingWithdrawalTotal } from "@/lib/finance";
 import { formatDateTime, formatMoney } from "@/lib/formatters";
 import { useApiResource } from "@/lib/hooks/use-api-resource";
@@ -35,7 +36,7 @@ export function DashboardPage() {
   const deposit = useApiResource("dashboard-deposit-methods", (signal) => api.getPaymentMethods(signal));
   const withdraw = useApiResource("dashboard-withdraw-methods", (signal) => api.getWithdrawMethods(signal));
   const auctions = useOptionalResource("dashboard-auctions", (signal) => api.getAuctions("active", { limit: 4 }, signal));
-  const level = useMemo(() => calculateLevel(user.turnover), [user.turnover]);
+  const level = useMemo(() => calculateLevel(currencyToRub(user.turnover, user.currency)), [user.turnover, user.currency]);
   const methodLabels = useMemo(() => buildMethodLabels(deposit.data, withdraw.data), [deposit.data, withdraw.data]);
   const pending = history.status === "success" ? pendingWithdrawalTotal(history.data, user.currency) : null;
   const listed = owned.status === "success" ? owned.data.filter((item) => item.status).length : null;
@@ -61,7 +62,7 @@ export function DashboardPage() {
         <div className="kpi-card">
           <span>Уровень</span><strong>{displayLevel}</strong>
           <div className="progress" role="progressbar" aria-label="Прогресс до следующего уровня" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(level.progress * 100)}><div className="progress__fill" style={{ width: `${Math.round(level.progress * 100)}%` }} /></div>
-          <small>{level.isMax ? "Максимальный уровень" : `До следующего: ${formatMoney(level.remaining, user.currency)}`}</small>
+          <small>{level.isMax ? "Максимальный уровень" : `До следующего: ${formatMoney(rubToCurrency(level.remaining, user.currency), user.currency)}`}</small>
         </div>
       </div>
 
