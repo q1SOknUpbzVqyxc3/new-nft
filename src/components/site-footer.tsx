@@ -1,12 +1,14 @@
 import { getBrandName } from "@/lib/brand";
 import { legalLinks } from "@/lib/legal";
+import { useLanguage } from "@/lib/language";
 import { getSupportUrl } from "@/lib/support";
 
 export function SiteFooter() {
+  const language = useLanguage();
   const links = [
-    { label: "Условия использования", href: legalLinks.terms() },
-    { label: "Конфиденциальность", href: legalLinks.privacy() },
-    { label: "Cookie", href: legalLinks.cookies() },
+    { label: "Условия использования", href: legalLinks.terms(language) },
+    { label: "Конфиденциальность", href: legalLinks.privacy(language) },
+    { label: "Cookie", href: legalLinks.cookies(language) },
     { label: "Поддержка", href: getSupportUrl() }
   ].filter((link): link is { label: string; href: string } => Boolean(link.href));
 

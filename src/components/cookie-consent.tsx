@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { legalLinks } from "@/lib/legal";
+import { useLanguage } from "@/lib/language";
 import { Button } from "./ui/button";
 
 const STORAGE_KEY = "cookie_consent";
@@ -10,8 +11,9 @@ function hasConsent() {
 
 export function CookieConsent() {
   const [visible, setVisible] = useState(() => !hasConsent());
+  const language = useLanguage();
   if (!visible) return null;
-  const policy = legalLinks.cookies();
+  const policy = legalLinks.cookies(language);
 
   function accept() {
     try { window.localStorage.setItem(STORAGE_KEY, "1"); } catch { /* the banner just reappears next visit */ }

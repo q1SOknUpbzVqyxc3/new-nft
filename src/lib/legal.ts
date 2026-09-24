@@ -1,3 +1,6 @@
+import type { SiteLanguage } from "./language";
+import { legalDocUrl, LEGAL_DOCS } from "./legal-docs";
+
 function envUrl(name: string) {
   const value: unknown = import.meta.env[name];
   if (typeof value !== "string" || !value.trim()) return null;
@@ -10,9 +13,12 @@ function envUrl(name: string) {
   }
 }
 
-/** Legal document links are per-site: configure VITE_TERMS_URL / VITE_PRIVACY_URL / VITE_COOKIE_URL. Unset links are not rendered. */
+/**
+ * Legal document links: an explicit VITE_*_URL override wins, otherwise the localized document for the
+ * current site language under /documentation (see legal-docs.ts) is used.
+ */
 export const legalLinks = {
-  terms: () => envUrl("VITE_TERMS_URL") ?? "https://monvravex.com/license/agreement.pdf",
-  privacy: () => envUrl("VITE_PRIVACY_URL"),
-  cookies: () => envUrl("VITE_COOKIE_URL")
+  terms: (language: SiteLanguage) => envUrl("VITE_TERMS_URL") ?? legalDocUrl(language, LEGAL_DOCS.terms),
+  privacy: (language: SiteLanguage) => envUrl("VITE_PRIVACY_URL") ?? legalDocUrl(language, LEGAL_DOCS.privacy),
+  cookies: (language: SiteLanguage) => envUrl("VITE_COOKIE_URL") ?? legalDocUrl(language, LEGAL_DOCS.cookies)
 };

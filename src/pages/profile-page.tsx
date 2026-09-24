@@ -16,6 +16,7 @@ import { getUserFacingError } from "@/lib/api/errors";
 import { api } from "@/lib/api/services";
 import { getFormString } from "@/lib/form-data";
 import { formatDateTime, formatMoney } from "@/lib/formatters";
+import { setLanguage as persistLanguage, type SiteLanguage, SITE_LANGUAGES, useLanguage } from "@/lib/language";
 import { validateEmail, validatePassword } from "@/lib/validation";
 
 type Section = "general" | "security" | "devices" | "achievements" | "settings";
@@ -23,6 +24,7 @@ type Feedback = { type: "success" | "error"; message: string };
 
 export function ProfilePage({ section = "general" }: { section?: Section }) {
   const { user, refreshUser } = useAuthenticatedUser();
+  const language = useLanguage();
   const [pending, setPending] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
@@ -85,9 +87,11 @@ export function ProfilePage({ section = "general" }: { section?: Section }) {
   async function submitSettings(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
+    const nextLanguage = getFormString(data, "language", language);
     await runUpdate(async () => {
-      await api.setLanguage(getFormString(data, "language", "ru"));
+      await api.setLanguage(nextLanguage);
       if (getFormString(data, "currency", user.currency) !== user.currency) await api.setCurrency(getFormString(data, "currency", user.currency));
+      if (nextLanguage !== language) persistLanguage(nextLanguage as SiteLanguage);
     });
   }
 
@@ -126,7 +130,7 @@ export function ProfilePage({ section = "general" }: { section?: Section }) {
             <TwoFactorCard />
           </> : section === "devices" ? <DeviceSessionsCard /> : section === "achievements" ? <AchievementsPanel /> : <>
             <h2>Язык и валюта</h2>
-            <form className="form-stack" onSubmit={(event) => void submitSettings(event)}><label className="field"><span className="field__label">Язык</span><select className="select" name="language" defaultValue="ru" disabled={pending}><option value="ru">Русский</option><option value="en">English</option><option value="ua">Українська</option><option value="bl">Беларуская</option><option value="de">Deutsch</option><option value="fr">Français</option><option value="cn">中文</option></select></label><label className="field"><span className="field__label">Валюта</span><select className="select" name="currency" defaultValue={user.currency} disabled={pending}>{["RUB", "UAH", "KZT", "BYN", "USD", "EUR"].map((value) => <option key={value}>{value}</option>)}</select></label><Button type="submit" disabled={pending}>{pending ? "Сохраняем…" : "Сохранить настройки"}</Button></form>
+            <form className="form-stack" onSubmit={(event) => void submitSettings(event)}><label className="field"><span className="field__label">Язык</span><select className="select" name="language" key={language} defaultValue={language} disabled={pending}>{SITE_LANGUAGES.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label><label className="field"><span className="field__label">Валюта</span><select className="select" name="currency" defaultValue={user.currency} disabled={pending}>{["RUB", "UAH", "KZT", "BYN", "USD", "EUR"].map((value) => <option key={value}>{value}</option>)}</select></label><Button type="submit" disabled={pending}>{pending ? "Сохраняем…" : "Сохранить настройки"}</Button></form>
           </>}
           {feedback ? <div className={feedback.type === "error" ? "inline-alert" : "inline-alert inline-alert--success"} role="status">{feedback.message}</div> : null}
         </section>

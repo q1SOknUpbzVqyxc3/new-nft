@@ -6,6 +6,7 @@ import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
 import { legalLinks } from "@/lib/legal";
+import { useLanguage } from "@/lib/language";
 import { DEFAULT_CLIENT_ROUTE } from "@/lib/navigation";
 import { getBrandName } from "@/lib/brand";
 import { api } from "@/lib/api/services";
@@ -25,6 +26,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
   const auth = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const language = useLanguage();
   const [pending, setPending] = useState(false);
   const [formError, setFormError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -131,7 +133,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
           {mode !== "login" ? <TextField label="Повторите пароль" name="repeatPassword" type="password" autoComplete="new-password" error={fieldErrors.repeatPassword} disabled={pending} required /> : null}
           {mode === "signup" ? <TextField label="Код приглашения (необязательно)" name="invite" inputMode="numeric" defaultValue={window.localStorage.getItem("invite_code") ?? ""} error={fieldErrors.invite} disabled={pending} /> : null}
           {mode === "login" ? <label className="check-row"><input name="remember" type="checkbox" disabled={pending} /> <span>Запомнить меня</span></label> : null}
-          {mode === "signup" ? <><label className="check-row"><input name="agreement" type="checkbox" disabled={pending} /> <span>Принимаю {legalLinks.terms() ? <a href={legalLinks.terms() ?? undefined} target="_blank" rel="noreferrer">пользовательское соглашение</a> : "пользовательское соглашение"}</span></label>{fieldErrors.agreement ? <span className="field__message field__message--error">{fieldErrors.agreement}</span> : null}<label className="check-row"><input name="newsletter" type="checkbox" disabled={pending} /> <span>Получать новости продукта</span></label></> : null}
+          {mode === "signup" ? <><label className="check-row"><input name="agreement" type="checkbox" disabled={pending} /> <span>Принимаю {legalLinks.terms(language) ? <a href={legalLinks.terms(language) ?? undefined} target="_blank" rel="noreferrer">пользовательское соглашение</a> : "пользовательское соглашение"}</span></label>{fieldErrors.agreement ? <span className="field__message field__message--error">{fieldErrors.agreement}</span> : null}<label className="check-row"><input name="newsletter" type="checkbox" disabled={pending} /> <span>Получать новости продукта</span></label></> : null}
           {formError ? <div className="inline-alert" role="alert">{formError}</div> : null}
           <Button type="submit" size="large" disabled={pending}>{pending ? "Отправляем…" : content[mode].submit}</Button>
         </form>

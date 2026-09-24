@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { readCookie, writeCookie } from "./cookie";
 
 /**
  * TEMPORARY: design variants for side-by-side review. Remove together with DesignSwitcher and themes.css.
@@ -25,16 +26,6 @@ const CHANGE_EVENT = "monvravex:design-change";
 function idToDesign(id: number): DesignId {
   const entry = (Object.entries(DESIGN_COOKIE_IDS) as Array<[DesignId, number]>).find(([, value]) => value === id);
   return entry ? entry[0] : "default";
-}
-
-function readCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  const value = match?.[1];
-  return value === undefined ? null : decodeURIComponent(value);
-}
-
-function writeCookie(name: string, value: string) {
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=31536000; samesite=lax`;
 }
 
 export function readDesign(): DesignId {
