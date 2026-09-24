@@ -7,13 +7,15 @@ type SafeMediaProps = {
   alt: string;
   className?: string;
   eager?: boolean;
+  /** Sends the session cookie cross-origin (needed for auth-gated resources like the avatar endpoint). */
+  credentials?: boolean;
 };
 
-export function SafeMedia({ src, alt, className, eager = false }: SafeMediaProps) {
-  return <SafeMediaImage key={src} src={src} alt={alt} className={className} eager={eager} />;
+export function SafeMedia({ src, alt, className, eager = false, credentials = false }: SafeMediaProps) {
+  return <SafeMediaImage key={src} src={src} alt={alt} className={className} eager={eager} credentials={credentials} />;
 }
 
-function SafeMediaImage({ src, alt, className, eager = false }: SafeMediaProps) {
+function SafeMediaImage({ src, alt, className, eager = false, credentials = false }: SafeMediaProps) {
   const [hasError, setHasError] = useState(false);
   const safeSource = /^https?:\/\//i.test(src) || src.startsWith("/") ? src : "";
 
@@ -35,6 +37,7 @@ function SafeMediaImage({ src, alt, className, eager = false }: SafeMediaProps) 
       fetchPriority={eager ? "high" : "auto"}
       decoding="async"
       referrerPolicy="no-referrer"
+      crossOrigin={credentials ? "use-credentials" : undefined}
       onError={() => setHasError(true)}
     />
   );

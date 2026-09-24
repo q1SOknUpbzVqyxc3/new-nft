@@ -1,4 +1,4 @@
-import { LogOut, MailCheck, RefreshCw } from "lucide-react";
+import { LogOut, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/auth/auth-context";
@@ -32,5 +32,5 @@ export function ActivationGate() {
     await navigate("/", { replace: true });
   }
 
-  return <main className="activation-page"><section className="activation-card"><span className="activation-card__icon"><MailCheck /></span><span className="eyebrow">Email verification</span><h1>Подтвердите электронную почту</h1><p>Мы отправили ссылку для активации на адрес вашего аккаунта. После подтверждения вернитесь сюда и обновите статус.</p>{feedback ? <div className={feedback.type === "success" ? "inline-alert inline-alert--success" : "inline-alert"} role="status">{feedback.message}</div> : null}<div className="activation-actions"><Button size="large" disabled={pending !== null} onClick={() => void refresh()}><RefreshCw size={17} />{pending === "refresh" ? "Проверяем…" : "Я подтвердил почту"}</Button><Button variant="secondary" disabled={pending !== null} onClick={() => void resend()}>{pending === "resend" ? "Отправляем…" : "Отправить письмо снова"}</Button><Button variant="ghost" disabled={pending !== null} onClick={() => void logout()}><LogOut size={17} /> Выйти</Button></div></section></main>;
+  return <main className="activation-page"><section className="activation-card"><span className="eyebrow">Email verification</span><h1>Подтвердите электронную почту</h1><p>Мы отправили ссылку для активации на адрес вашего аккаунта. После подтверждения вернитесь сюда и обновите статус.</p>{feedback ? <div className={feedback.type === "success" ? "inline-alert inline-alert--success" : "inline-alert"} role="status">{feedback.message}</div> : null}<div className="activation-actions"><Button size="large" disabled={pending !== null} onClick={() => void refresh()}><RefreshCw size={17} />{pending === "refresh" ? "Проверяем…" : "Я подтвердил почту"}</Button><Button variant="secondary" disabled={pending !== null} onClick={() => void resend()}>{pending === "resend" ? "Отправляем…" : "Отправить письмо снова"}</Button><Button variant="ghost" disabled={pending !== null} onClick={() => void logout()}><LogOut size={17} /> Выйти</Button></div></section></main>;
 }

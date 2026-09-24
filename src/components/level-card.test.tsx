@@ -11,7 +11,7 @@ describe("LevelCard", () => {
   afterEach(cleanup);
 
   it("derives the level from turnover", () => {
-    render(<LevelCard user={user({ turnover: 2_600 })} />);
+    render(<LevelCard user={user({ turnover: 260_000, currency: "RUB" })} />);
     expect(screen.getByRole("progressbar")).toBeTruthy();
     expect(screen.getAllByText("Ваш уровень")).toHaveLength(1);
     expect(screen.getByText(/До уровня 4 осталось/)).toBeTruthy();

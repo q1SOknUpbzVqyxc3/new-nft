@@ -6,7 +6,6 @@ import { App } from "./app";
 import "./app/fonts";
 import "./app/globals.css";
 import "./app/themes.css";
-import { DesignSwitcher } from "./components/design-switcher";
 import { applyDesign, readDesign } from "./lib/design";
 
 applyDesign(readDesign());
@@ -19,7 +18,6 @@ if (!root) {
 
 createRoot(root).render(
   <StrictMode>
-    <DesignSwitcher />
     <BrowserRouter>
       <AuthProvider>
         <App />

@@ -39,6 +39,15 @@ export function resolveApiMediaUrl(value: string) {
   return `${getApiBaseUrl()}${value.startsWith("/") ? value : `/${value}`}`;
 }
 
+/**
+ * The avatar image lives behind the cookie-authenticated `GET /api/user/{id}.pic` resource, not at the raw
+ * `avatar` field; `version` (pass the raw `avatar` field) only busts the browser cache after a re-upload.
+ */
+export function resolveAvatarUrl(userId: number | string, version?: string) {
+  const base = `${getApiBaseUrl()}/api/user/${userId}.pic`;
+  return version ? `${base}?v=${encodeURIComponent(version)}` : base;
+}
+
 async function parseResponseBody(response: Response) {
   const responseText = await response.text();
 

@@ -1,4 +1,5 @@
 import type { CollectionDetails, CollectionStats, OwnedNft, SeriesPoint, User } from "./api/schemas";
+import { currencyToRub, rubToCurrency } from "./currency";
 import { formatMoney } from "./formatters";
 import { calculateLevel } from "./levels";
 
@@ -99,13 +100,16 @@ export type Achievement = { id: string; title: string; description: string; curr
 /** Achievements are derived from data the frontend already has, so they work without a dedicated backend endpoint. */
 export function evaluateAchievements(input: { user: User; ownedCount: number; hasTwoFactor: boolean }): Achievement[] {
   const { user, ownedCount, hasTwoFactor } = input;
-  const level = user.level !== undefined ? Math.round(user.level) : calculateLevel(user.turnover).level;
+  const turnoverRub = currencyToRub(user.turnover, user.currency);
+  const level = user.level !== undefined ? Math.round(user.level) : calculateLevel(turnoverRub).level;
+  const TRADER_TARGET_RUB = 5_000;
+  const WHALE_TARGET_RUB = 100_000;
   const defs: Array<Omit<Achievement, "done" | "progress">> = [
     { id: "first-nft", title: "Первый NFT", description: "Купите свой первый NFT", current: ownedCount, target: 1 },
     { id: "collector", title: "Коллекционер", description: "Соберите 10 NFT в портфеле", current: ownedCount, target: 10 },
     { id: "curator", title: "Куратор", description: "Соберите 50 NFT в портфеле", current: ownedCount, target: 50 },
-    { id: "trader", title: "Трейдер", description: `Достигните оборота ${formatMoney(5_000, user.currency)}`, current: user.turnover, target: 5_000 },
-    { id: "whale", title: "Кит", description: `Достигните оборота ${formatMoney(100_000, user.currency)}`, current: user.turnover, target: 100_000 },
+    { id: "trader", title: "Трейдер", description: `Достигните оборота ${formatMoney(rubToCurrency(TRADER_TARGET_RUB, user.currency), user.currency)}`, current: turnoverRub, target: TRADER_TARGET_RUB },
+    { id: "whale", title: "Кит", description: `Достигните оборота ${formatMoney(rubToCurrency(WHALE_TARGET_RUB, user.currency), user.currency)}`, current: turnoverRub, target: WHALE_TARGET_RUB },
     { id: "level-5", title: "Уровень 5", description: "Поднимитесь до 5 уровня", current: level, target: 5 },
     { id: "verified", title: "Проверенный", description: "Пройдите верификацию аккаунта", current: user.verificated ? 1 : 0, target: 1 },
     { id: "secure", title: "Под защитой", description: "Включите двухфакторную защиту", current: hasTwoFactor ? 1 : 0, target: 1 }

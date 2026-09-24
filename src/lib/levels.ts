@@ -1,5 +1,5 @@
-/** Default turnover thresholds (account currency). Replace when the backend exposes its own level table. */
-export const DEFAULT_LEVEL_THRESHOLDS = [0, 1_000, 2_500, 5_000, 10_000, 25_000, 50_000, 100_000, 250_000, 500_000] as const;
+/** Turnover thresholds in RUB; convert with `rubToCurrency` before comparing against a turnover in another currency. */
+export const LEVEL_THRESHOLDS_RUB = [0, 100_000, 250_000, 500_000, 1_000_000, 2_500_000, 5_000_000, 10_000_000, 25_000_000, 50_000_000] as const;
 
 export type LevelProgress = {
   level: number;
@@ -10,7 +10,7 @@ export type LevelProgress = {
   remaining: number;
 };
 
-export function calculateLevel(turnover: number, thresholds: readonly number[] = DEFAULT_LEVEL_THRESHOLDS): LevelProgress {
+export function calculateLevel(turnover: number, thresholds: readonly number[] = LEVEL_THRESHOLDS_RUB): LevelProgress {
   const value = Number.isFinite(turnover) && turnover > 0 ? turnover : 0;
   const maxLevel = thresholds.length;
   let level = 1;

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { SafeMedia } from "@/components/ui/safe-media";
 import { TextField } from "@/components/ui/text-field";
 import { TwoFactorCard } from "@/components/two-factor-card";
-import { resolveApiMediaUrl } from "@/lib/api/client";
+import { resolveAvatarUrl } from "@/lib/api/client";
 import { getUserFacingError } from "@/lib/api/errors";
 import { api } from "@/lib/api/services";
 import { getFormString } from "@/lib/form-data";
@@ -115,7 +115,7 @@ export function ProfilePage({ section = "general" }: { section?: Section }) {
           {section === "general" ? <>
             <AccountStatus user={user} />
             {!user.can_withdraw || user.is_banned || !user.active ? <p className="profile-muted">Часть операций временно недоступна. <SupportLink /></p> : null}
-            <div className="profile-identity"><div className="profile-avatar">{user.avatar ? <SafeMedia src={resolveApiMediaUrl(user.avatar)} alt="Аватар пользователя" /> : <UserRound />}<label className="profile-avatar__action"><Camera /><span className="sr-only">Загрузить новый аватар</span><input type="file" accept="image/jpeg,image/png,image/webp" disabled={pending} onChange={(event) => void uploadAvatar(event)} /></label></div><div><h2>{user.username || user.email.split("@")[0]}</h2>{user.verificated ? <span className="verified-label"><BadgeCheck /> Проверенный аккаунт</span> : <span className="profile-muted">ID {String(user.id)}</span>}</div></div>
+            <div className="profile-identity"><div className="profile-avatar">{user.avatar ? <SafeMedia src={resolveAvatarUrl(user.id, user.avatar)} alt="Аватар пользователя" credentials /> : <UserRound />}<label className="profile-avatar__action"><Camera /><span className="sr-only">Загрузить новый аватар</span><input type="file" accept="image/jpeg,image/png,image/webp" disabled={pending} onChange={(event) => void uploadAvatar(event)} /></label></div><div><h2>{user.username || user.email.split("@")[0]}</h2>{user.verificated ? <span className="verified-label"><BadgeCheck /> Проверенный аккаунт</span> : <span className="profile-muted">ID {String(user.id)}</span>}</div></div>
             <div className="account-metrics"><div><span>Баланс</span><strong>{formatMoney(user.balance, user.currency)}</strong></div><div><span>Оборот</span><strong>{formatMoney(user.turnover, user.currency)}</strong></div></div>
             <LevelCard user={user} />
             <form className="form-stack profile-form" onSubmit={(event) => void submitUsername(event)}><TextField label="Имя пользователя" name="username" defaultValue={user.username ?? ""} minLength={3} maxLength={20} disabled={pending} required /><Button type="submit" disabled={pending}>{pending ? "Сохраняем…" : "Изменить имя"}</Button></form>
