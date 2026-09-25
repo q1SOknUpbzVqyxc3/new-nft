@@ -2,6 +2,7 @@ import { ArrowRight, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Brand } from "@/components/brand";
 import { DesignArt } from "@/components/design-art";
+import { GuaranteesSection, HowItWorksSection } from "@/components/landing-sections";
 
 export function LandingPage() {
   return (
@@ -27,6 +28,8 @@ export function LandingPage() {
           <DesignArt />
         </div>
       </section>
+      <HowItWorksSection />
+      <GuaranteesSection />
       <section className="landing__principles container" aria-label="Преимущества">
         <div><ShieldCheck /><strong>Надёжные сценарии</strong><span>Понятные статусы каждой операции</span></div>
         <div><Zap /><strong>Быстрый доступ</strong><span>Коллекции и активы без лишних шагов</span></div>
