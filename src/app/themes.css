@@ -100,8 +100,6 @@
   & .trust-list, & .trust-row + .trust-row { border-color: #292d30; }
   & .progress { background: #14181f; }
   & .progress__fill { background: #f0f0f0; }
-  & .landing__principles { border-top-color: #292d30; }
-  & .landing__principles svg { color: #a1a4a5; }
   & .auth-art { border: 1px solid #292d30; background: #000; }
   & .auth-art strong { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.01em; }
   & .support-banner { background: #000; border-color: #292d30; }
@@ -164,8 +162,6 @@
   & .data-table__head { background: transparent; }
   & .data-table__row { border-top-color: rgba(255, 255, 255, 0.08); }
   & .progress__fill { background: linear-gradient(90deg, #8052ff, #ffb829); }
-  & .landing__principles { border-top-color: transparent; }
-  & .landing__principles svg { color: #ffb829; }
   & .auth-art { background: transparent; }
   & .auth-art strong { font-weight: 400; letter-spacing: -0.04em; }
   & .support-banner { background: transparent; }
@@ -259,8 +255,6 @@
   & .status-pill { padding: 0.1rem 0.5rem 0.1rem 0.4rem; border-radius: 3px; font-size: 0.6875rem; }
   & .progress { border-radius: 0; background: #1d1a18; }
   & .progress__fill { background: #a0ca92; border-radius: 0; }
-  & .landing__principles { border-top-color: #2a2725; }
-  & .landing__principles svg { color: #ee6018; }
   & .auth-art { border: 1px solid #2a2725; background: #0d0d0d; }
   & .auth-art strong { font-weight: 400; letter-spacing: -0.04em; }
   & .support-banner { background: #1d1a18; border-color: transparent; }

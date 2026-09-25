@@ -6,10 +6,12 @@ import { api } from "@/lib/api/services";
 import { formatMoney } from "@/lib/formatters";
 import { useApiResource } from "@/lib/hooks/use-api-resource";
 import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
+import { useT } from "@/lib/i18n";
 import { LoadingState } from "./ui/page-state";
 import { SafeMedia } from "./ui/safe-media";
 
 export function MarketplaceSearch() {
+  const t = useT();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,7 +52,7 @@ export function MarketplaceSearch() {
         value={query}
         onChange={(event) => { setQuery(event.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
-        placeholder="Поиск по маркету"
+        placeholder={t("header_search_placeholder")}
         aria-label="Поиск по маркетплейсу"
       />
       {query ? <button type="button" className="search-clear" aria-label="Очистить поиск" onClick={() => { setQuery(""); setOpen(false); }}><X size={16} /></button> : null}

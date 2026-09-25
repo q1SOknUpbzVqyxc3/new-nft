@@ -96,7 +96,7 @@ export function CollectionPage() {
       </div>
       <div className="container collection-content">
         <CollectionMarketStats collectionId={collectionId} details={details} currency={currency} />
-        <div className="collection-toolbar"><div><strong>Items</strong><span>{visibleNfts.length} из {details.nfts.length}</span></div><label className="search-box collection-search"><Search size={18} /><input className="field__input" value={query} onChange={(event) => setParam("q", event.target.value)} placeholder="Поиск по token ID" /></label></div>
+        <div className="collection-toolbar"><div><strong>Объекты</strong><span>{visibleNfts.length} из {details.nfts.length}</span></div><label className="search-box collection-search"><Search size={18} /><input className="field__input" value={query} onChange={(event) => setParam("q", event.target.value)} placeholder="Поиск по token ID" /></label></div>
         <div className="collection-filters" role="group" aria-label="Фильтры">
           {chains.length > 1 ? (
             <label className="field"><span className="field__label">Блокчейн</span><select className="select" value={chain} onChange={(event) => setParam("chain", event.target.value)}><option value="">Все сети</option>{chains.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>

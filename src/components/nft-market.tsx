@@ -22,11 +22,11 @@ export function NftFacts({ item, extra, unavailable }: { item: NftDetails; extra
   return (
     <>
       <StatGrid className="nft-facts" items={[
-        { label: "Token ID", value: String(item.number) },
-        { label: "Blockchain", value: item.blockchain || undefined },
-        { label: "Contract address", value: extra?.contract_address ? <span className="break-value" title={extra.contract_address}>{formatAddress(extra.contract_address, 6)}</span> : undefined },
-        { label: "Rarity rank", value: extra?.rarity_rank === undefined ? undefined : `#${extra.rarity_rank}${extra.supply ? ` из ${extra.supply}` : ""}` },
-        { label: "Rarity score", value: extra?.rarity_score === undefined ? undefined : extra.rarity_score.toLocaleString("ru-RU", { maximumFractionDigits: 2 }) }
+        { label: "Токен ID", value: String(item.number) },
+        { label: "Блокчейн", value: item.blockchain || undefined },
+        { label: "Адрес контракта", value: extra?.contract_address ? <span className="break-value" title={extra.contract_address}>{formatAddress(extra.contract_address, 6)}</span> : undefined },
+        { label: "Ранг редкости", value: extra?.rarity_rank === undefined ? undefined : `#${extra.rarity_rank}${extra.supply ? ` из ${extra.supply}` : ""}` },
+        { label: "Индекс редкости", value: extra?.rarity_score === undefined ? undefined : extra.rarity_score.toLocaleString("ru-RU", { maximumFractionDigits: 2 }) }
       ]} />
       {tier ? <span className={`rarity-badge rarity-badge--${tier.id}`}>{tier.label}</span> : null}
       {unavailable ? <UnavailableNote>Атрибуты, редкость и адрес контракта появятся, когда сервер начнёт отдавать их.</UnavailableNote> : null}

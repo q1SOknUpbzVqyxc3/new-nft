@@ -97,7 +97,7 @@ describe("marketplace features", () => {
     render(<NftFacts item={item} unavailable={false} extra={{ rarity_rank: 5, supply: 1000, rarity_score: 88.5, traits: [{ trait_type: "Фон", value: "Синий", rarity_percent: 4 }] }} />);
     expect(screen.getByText("Легендарный")).toBeInTheDocument();
     expect(screen.getByText("Синий")).toBeInTheDocument();
-    expect(screen.getByText("Contract address").nextSibling?.textContent).toBe("—");
+    expect(screen.getByText("Адрес контракта").nextSibling?.textContent).toBe("—");
     expect(screen.queryByText("Владелец")).not.toBeInTheDocument();
     expect(screen.queryByText("Creator")).not.toBeInTheDocument();
   });
@@ -107,9 +107,9 @@ describe("marketplace features", () => {
     const owned = [{ id: 1, status: false, sale_price: 0, buy_price: 250, pic: { id: 1, image: "", number: 1, price: 300, collection: { name: "C", blockchain: "" } } }] as unknown as OwnedNft[];
     render(<PortfolioAnalytics owned={owned} currency="RUB" />);
     expect(await screen.findByText(/Реализованная прибыль.*появятся/)).toBeInTheDocument();
-    expect(screen.getByText("Portfolio value").nextSibling?.textContent).toContain("300");
-    expect(screen.getByText("Unrealized P&L").nextSibling?.textContent).toContain("+50");
-    expect(screen.getByText("Best performer").nextSibling?.textContent).toContain("C #1");
+    expect(screen.getByText("Оценка портфеля").nextSibling?.textContent).toContain("300");
+    expect(screen.getByText("Нереализ. прибыль").nextSibling?.textContent).toContain("+50");
+    expect(screen.getByText("Лучший актив").nextSibling?.textContent).toContain("C #1");
     expect(screen.getByRole("button", { name: "1Y" })).toBeInTheDocument();
   });
 
@@ -117,8 +117,8 @@ describe("marketplace features", () => {
     stubApi({ "/api/collection/stats": () => jsonResponse({ total_volume: 5000, owners: 42, floor_history: [{ time: "2026-09-01T00:00:00Z", value: 10 }, { time: "2026-09-02T00:00:00Z", value: 12 }] }) });
     const details = { name: "A", author: "Mira", in_own: 0, min_price: 10, max_price: 90, nfts: [{}, {}] } as never;
     render(<MemoryRouter><CollectionMarketStats collectionId="1" details={details} currency="RUB" /></MemoryRouter>);
-    await waitFor(() => expect(screen.getByText("Total volume").nextSibling?.textContent).toContain("5"));
-    expect(screen.getByText("Owners").nextSibling?.textContent).toBe("42");
+    await waitFor(() => expect(screen.getByText("Объём торгов").nextSibling?.textContent).toContain("5"));
+    expect(screen.getByText("Владельцы").nextSibling?.textContent).toBe("42");
     expect(screen.queryByText("Royalty")).not.toBeInTheDocument();
     expect(screen.getByRole("img", { name: "График floor price" })).toBeInTheDocument();
   });

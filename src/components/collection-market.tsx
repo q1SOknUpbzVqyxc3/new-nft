@@ -18,11 +18,11 @@ export function CollectionMarketStats({ collectionId, details, currency }: { col
   return (
     <section className="collection-market" aria-label="Статистика коллекции">
       <StatGrid items={[
-        { label: "Floor price", value: money(view.floor), hint: "Минимальная цена среди выставленных NFT" },
-        { label: "Total volume", value: money(view.volume), hint: "Суммарный объём продаж" },
-        { label: "Owners", value: view.owners === undefined ? undefined : formatCompactNumber(view.owners) },
-        { label: "Listed", value: view.listedPercent === undefined ? undefined : formatPercent(view.listedPercent), hint: "Доля NFT, выставленных на продажу" },
-        { label: "Supply", value: view.supply === undefined ? undefined : formatCompactNumber(view.supply) }
+        { label: "Флор-цена", value: money(view.floor), hint: "Минимальная цена среди выставленных NFT" },
+        { label: "Объём торгов", value: money(view.volume), hint: "Суммарный объём продаж" },
+        { label: "Владельцы", value: view.owners === undefined ? undefined : formatCompactNumber(view.owners) },
+        { label: "В продаже", value: view.listedPercent === undefined ? undefined : formatPercent(view.listedPercent), hint: "Доля NFT, выставленных на продажу" },
+        { label: "Всего NFT", value: view.supply === undefined ? undefined : formatCompactNumber(view.supply) }
       ]} />
       {view.description ? <p className="collection-market__description">{view.description}</p> : null}
       <div className="surface collection-market__chart">

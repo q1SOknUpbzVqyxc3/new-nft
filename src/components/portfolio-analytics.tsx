@@ -28,14 +28,14 @@ export function PortfolioAnalytics({ owned, currency }: { owned: OwnedNft[]; cur
   return (
     <section className="portfolio-analytics" aria-label="Аналитика портфеля">
       <StatGrid items={[
-        { label: "Portfolio value", value: money(server?.value ?? derived.value), hint: "Оценка по текущим ценам" },
-        { label: "NFTs owned", value: server?.count ?? derived.count },
-        { label: "Unrealized P&L", value: <Pnl value={server?.unrealized_pnl ?? derived.unrealized} currency={currency} />, hint: "Нереализованная прибыль или убыток" },
-        { label: "Realized P&L", value: <Pnl value={server?.realized_pnl} currency={currency} />, hint: "Зафиксированная прибыль или убыток" },
-        { label: "Total spent", value: money(server?.total_spent) },
-        { label: "Total received", value: money(server?.total_received) },
-        { label: "Best performer", value: best ? <span className="performer">{best.name} <Pnl value={best.pnl} currency={currency} /></span> : undefined },
-        { label: "Worst performer", value: worst ? <span className="performer">{worst.name} <Pnl value={worst.pnl} currency={currency} /></span> : undefined }
+        { label: "Оценка портфеля", value: money(server?.value ?? derived.value), hint: "Оценка по текущим ценам" },
+        { label: "NFT в портфеле", value: server?.count ?? derived.count },
+        { label: "Нереализ. прибыль", value: <Pnl value={server?.unrealized_pnl ?? derived.unrealized} currency={currency} />, hint: "Нереализованная прибыль или убыток" },
+        { label: "Реализ. прибыль", value: <Pnl value={server?.realized_pnl} currency={currency} />, hint: "Зафиксированная прибыль или убыток" },
+        { label: "Потрачено", value: money(server?.total_spent) },
+        { label: "Получено", value: money(server?.total_received) },
+        { label: "Лучший актив", value: best ? <span className="performer">{best.name} <Pnl value={best.pnl} currency={currency} /></span> : undefined },
+        { label: "Худший актив", value: worst ? <span className="performer">{worst.name} <Pnl value={worst.pnl} currency={currency} /></span> : undefined }
       ]} />
       {stats.state === "unavailable" ? <UnavailableNote>Реализованная прибыль, потраченные и полученные суммы появятся, когда сервер начнёт считать их по проданным NFT. Стоимость, число NFT и нереализованная прибыль посчитаны по вашему портфелю (цена покупки есть в списке NFT).</UnavailableNote> : null}
       <div className="surface portfolio-chart">

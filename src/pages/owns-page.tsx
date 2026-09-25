@@ -39,11 +39,11 @@ export function OwnsPage() {
       {tab === "history" ? (
         nftHistory.status === "loading" ? <LoadingState label="Загружаем историю" /> : nftHistory.status === "error" ? <ErrorState message={getUserFacingError(nftHistory.error)} onRetry={nftHistory.refresh} /> : nftHistory.data.length ? (
           <div className="data-table" role="table">
-            <div className="data-table__head" role="row"><span>Коллекция</span><span>Token ID</span><span>Дата</span><span>Цена</span></div>
+            <div className="data-table__head" role="row"><span>Коллекция</span><span>Токен ID</span><span>Дата</span><span>Цена</span></div>
             {nftHistory.data.map((item, index) => (
               <div className="data-table__row" role="row" key={String(item.id ?? index)}>
                 <span data-label="Коллекция">{item.collection_name}<small>{item.sale_date ? "Продан" : item.status === 1 ? "На продаже" : "Куплен"}</small></span>
-                <span data-label="Token ID">#{item.pic_id}</span>
+                <span data-label="Токен ID">#{item.pic_id}</span>
                 <span data-label="Дата">{item.sale_date ?? item.buy_date ? formatDateTime(item.sale_date ?? item.buy_date ?? "") : "—"}</span>
                 <strong data-label="Цена">{item.sale_price > 0 ? formatMoney(item.sale_price, user.currency) : "—"}</strong>
               </div>

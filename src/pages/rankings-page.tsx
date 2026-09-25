@@ -46,7 +46,7 @@ export function RankingsPage() {
       {ranking.state === "loading" || (ranking.state === "unavailable" && fallback.status === "loading") ? <LoadingState label="Загружаем рейтинг" /> : ranking.state === "error" ? <ErrorState message={getUserFacingError(ranking.error)} onRetry={ranking.refresh} /> : rows.length === 0 ? <EmptyState title="Пока пусто" description="Коллекции появятся здесь, когда на маркете начнётся активность." /> : (
         <div className="tx-table-wrap">
           <table className="tx-table rank-table">
-            <thead><tr><th>#</th><th>Коллекция</th><th>Floor</th><th>Объём</th><th>Изменение</th><th>Владельцы</th><th>Items</th></tr></thead>
+            <thead><tr><th>#</th><th>Коллекция</th><th>Мин. цена</th><th>Объём</th><th>Изменение</th><th>Владельцы</th><th>Объекты</th></tr></thead>
             <tbody>
               {rows.map((row, index) => {
                 const currency = row.currency ?? user.currency;
@@ -55,11 +55,11 @@ export function RankingsPage() {
                   <tr key={String(row.collection_id)}>
                     <td data-label="#">{index + 1}</td>
                     <td data-label="Коллекция"><Link to={`/client/collection/${row.collection_id}`} className="rank-table__name"><SafeMedia src={row.image} alt="" /><span><strong>{row.name}</strong>{row.blockchain ? <small>{row.blockchain}</small> : null}</span></Link></td>
-                    <td data-label="Floor">{row.floor_price === undefined ? "—" : formatMoney(row.floor_price, currency)}</td>
+                    <td data-label="Мин. цена">{row.floor_price === undefined ? "—" : formatMoney(row.floor_price, currency)}</td>
                     <td data-label="Объём">{row.volume === undefined ? "—" : formatMoney(row.volume, currency)}</td>
                     <td data-label="Изменение" className={change === undefined ? "" : change >= 0 ? "tx-table__amount--in" : "tx-table__amount--out"}>{change === undefined ? "—" : `${change > 0 ? "+" : ""}${formatPercent(change)}`}</td>
                     <td data-label="Владельцы">{row.owners === undefined ? "—" : formatCompactNumber(row.owners)}</td>
-                    <td data-label="Items">{row.items === undefined ? "—" : formatCompactNumber(row.items)}</td>
+                    <td data-label="Объекты">{row.items === undefined ? "—" : formatCompactNumber(row.items)}</td>
                   </tr>
                 );
               })}
