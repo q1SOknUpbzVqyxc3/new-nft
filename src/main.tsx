@@ -6,9 +6,9 @@ import { App } from "./app";
 import "./app/fonts";
 import "./app/globals.css";
 import "./app/themes.css";
-import { applyDesign, readDesign } from "./lib/design";
+import { initializeDesign } from "./lib/design";
 
-applyDesign(readDesign());
+initializeDesign();
 
 const root = document.getElementById("root");
 

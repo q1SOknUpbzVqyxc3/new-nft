@@ -8,7 +8,7 @@ import { handleNftNewsRequest } from "./server/nft-news.mjs";
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "dist");
 const port = Number(process.env.PORT ?? 3000);
 const backend = new URL(process.env.API_ORIGIN ?? "https://back.monvravex.com");
-const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp", ".ico": "image/x-icon", ".map": "application/json", ".woff2": "font/woff2" };
+const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp", ".ico": "image/x-icon", ".map": "application/json", ".woff2": "font/woff2", ".mp4": "video/mp4" };
 const headers = { "X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY", "Referrer-Policy": "strict-origin-when-cross-origin" };
 
 // Mirrors src/lib/brand.ts: one build serves every mirror domain, so the brand in <title>/Open Graph tags is derived from the Host header.
@@ -46,6 +46,31 @@ function proxy(req, res) {
   req.pipe(upstream);
 }
 
+function serveVideo(req, res, file) {
+  const size = statSync(file).size;
+  const range = req.headers.range;
+  const videoHeaders = { ...headers, "Content-Type": "video/mp4", "Cache-Control": "no-cache", "Accept-Ranges": "bytes" };
+  if (!range) {
+    res.writeHead(200, { ...videoHeaders, "Content-Length": size });
+    createReadStream(file).pipe(res);
+    return;
+  }
+
+  const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+  const first = match?.[1] ? Number(match[1]) : undefined;
+  const last = match?.[2] ? Number(match[2]) : undefined;
+  const start = first ?? (last === undefined ? NaN : Math.max(0, size - last));
+  const end = first === undefined ? size - 1 : Math.min(last ?? size - 1, size - 1);
+  if (!match || !Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start >= size || end < start) {
+    res.writeHead(416, { ...videoHeaders, "Content-Range": `bytes */${size}` });
+    res.end();
+    return;
+  }
+
+  res.writeHead(206, { ...videoHeaders, "Content-Range": `bytes ${start}-${end}/${size}`, "Content-Length": end - start + 1 });
+  createReadStream(file, { start, end }).pipe(res);
+}
+
 function serve(req, res) {
   const pathname = decodeURIComponent(new URL(req.url ?? "/", "http://x").pathname);
   let file = normalize(join(root, pathname));
@@ -55,6 +80,7 @@ function serve(req, res) {
     res.end(renderIndex(req.headers.host));
     return;
   }
+  if (extname(file) === ".mp4") return serveVideo(req, res, file);
   const immutable = file.includes(`${join(root, "assets")}`);
   res.writeHead(200, { ...headers, "Content-Type": types[extname(file)] ?? "application/octet-stream", "Cache-Control": immutable ? "public, max-age=31536000, immutable" : "no-cache" });
   createReadStream(file).pipe(res);

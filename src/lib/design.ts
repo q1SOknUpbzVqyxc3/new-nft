@@ -3,7 +3,7 @@ import { readCookie, writeCookie } from "./cookie";
 
 /**
  * TEMPORARY: design variants for side-by-side review. Remove together with DesignSwitcher and themes.css.
- * Persisted as a numeric cookie id (not localStorage) so the choice can be read server-side later if needed.
+ * Persisted as the numeric selected_theme cookie used by the other site. The older design cookie remains readable.
  * Cookie id → design:
  *   0 = default (стандартная тема)
  *   1 = resend
@@ -20,7 +20,8 @@ export const DESIGNS = [
 export type DesignId = (typeof DESIGNS)[number]["id"];
 
 const DESIGN_COOKIE_IDS: Record<DesignId, number> = { default: 0, resend: 1, dala: 2, factory: 3 };
-const COOKIE_NAME = "design";
+const COOKIE_NAME = "selected_theme";
+const LEGACY_COOKIE_NAME = "design";
 const CHANGE_EVENT = "monvravex:design-change";
 
 function idToDesign(id: number): DesignId {
@@ -29,9 +30,18 @@ function idToDesign(id: number): DesignId {
 }
 
 export function readDesign(): DesignId {
-  const raw = readCookie(COOKIE_NAME);
+  const selected = readCookie(COOKIE_NAME);
+  const raw = selected !== null && /^[0-3]$/.test(selected) ? selected : readCookie(LEGACY_COOKIE_NAME);
   const id = raw === null ? NaN : Number(raw);
   return Number.isFinite(id) ? idToDesign(id) : "default";
+}
+
+export function initializeDesign() {
+  if (readCookie(COOKIE_NAME) === null) {
+    const legacy = readCookie(LEGACY_COOKIE_NAME);
+    writeCookie(COOKIE_NAME, legacy !== null && /^[0-3]$/.test(legacy) ? legacy : "0");
+  }
+  applyDesign(readDesign());
 }
 
 export function applyDesign(design: DesignId) {
@@ -43,6 +53,7 @@ export function applyDesign(design: DesignId) {
 
 export function setDesign(design: DesignId) {
   writeCookie(COOKIE_NAME, String(DESIGN_COOKIE_IDS[design]));
+  writeCookie(LEGACY_COOKIE_NAME, String(DESIGN_COOKIE_IDS[design]));
   applyDesign(design);
   window.dispatchEvent(new Event(CHANGE_EVENT));
 }

@@ -938,18 +938,53 @@ img {
 }
 
 .landing__hero {
-  display: grid;
-  min-height: calc(100vh - 15rem);
-  grid-template-columns: 1.05fr 0.95fr;
+  position: relative;
+  display: flex;
+  min-height: calc(100svh - var(--header-height));
   align-items: center;
-  gap: var(--space-12);
+  overflow: hidden;
   padding-block: var(--space-16);
+  background: #080a0d;
+}
+
+.landing__hero-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+}
+
+.landing__hero--art .landing__hero-inner {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: var(--space-12);
+}
+
+.landing__hero-video,
+.landing__hero-scrim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.landing__hero-video {
+  object-fit: cover;
+  filter: brightness(0.68);
+}
+
+.landing__hero-scrim {
+  z-index: 1;
+  background: linear-gradient(90deg, rgba(5, 6, 9, 0.82) 0%, rgba(5, 6, 9, 0.64) 48%, rgba(5, 6, 9, 0.38) 100%);
 }
 
 .landing__copy {
-  /* Grid items default to min-width: auto, so the heading's unwrapped intrinsic width would otherwise
-     push this column wider than its track and overflow the viewport on narrow screens. */
   min-width: 0;
+  color: #f5f7fa;
+}
+
+.landing__hero .eyebrow {
+  color: #b8adff;
 }
 
 .landing__copy h1 {
@@ -963,9 +998,19 @@ img {
 
 .landing__copy p {
   max-width: 42rem;
-  color: var(--color-text-secondary);
+  color: #d1d5de;
   font-size: 1.05rem;
   line-height: 1.65;
+}
+
+.landing__hero .button--secondary {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(18, 21, 26, 0.72);
+  color: #f5f7fa;
+}
+
+.landing__hero .button--secondary:hover {
+  background: rgba(34, 39, 49, 0.9);
 }
 
 .landing__visual {
@@ -1161,10 +1206,10 @@ img {
 .centered-page p { color: var(--color-text-secondary); }
 
 @media (max-width: 1023px) {
-  .landing__hero,.asset-layout { grid-template-columns: 1fr; }
+  .landing__hero--art .landing__hero-inner,.asset-layout { grid-template-columns: 1fr; }
   /* Collapsing to a single 1fr track still leaves children at their default min-width: auto, so
      unwrapped long text (headings, addresses) can force the column wider than the viewport. */
-  .landing__hero > *,.asset-layout > * { min-width: 0; }
+  .landing__hero--art .landing__hero-inner > *,.asset-layout > * { min-width: 0; }
   .landing__visual { display: none; }
   .landing__copy h1 { max-width: 12ch; }
   .collection-stats { grid-template-columns: repeat(2,1fr); gap: var(--space-4); }
@@ -1182,7 +1227,9 @@ img {
   .mobile-menu svg { width: 1.1rem; flex: none; }
   .balance-chip span { display: none; }
   .header-actions { padding-left: 0; border-left: 0; }
-  .landing__hero { min-height: 34rem; padding-block: var(--space-8); }
+  .landing__hero { min-height: calc(100svh - var(--header-height)); padding-block: var(--space-8); }
+  .landing__hero-video { object-position: center; }
+  .landing__hero-scrim { background: linear-gradient(180deg, rgba(5, 6, 9, 0.66), rgba(5, 6, 9, 0.58) 42%, rgba(5, 6, 9, 0.86)); }
   .landing__copy h1 { font-size: clamp(2.65rem,14vw,4.5rem); }
   .auth-layout { grid-template-columns: 1fr; }
   .auth-art { display: none; }
